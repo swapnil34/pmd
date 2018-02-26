@@ -5,7 +5,7 @@ permalink: pmd_rules_vf_security.html
 folder: pmd/rules/vf
 sidebaractiveurl: /pmd_rules_vf.html
 editmepath: ../pmd-visualforce/src/main/resources/category/vf/security.xml
-keywords: Security, VfCsrf, VfUnescapeEl
+keywords: Security, VfCsrf, VfUnescapeEl, VfLCCdetection
 ---
 ## VfCsrf
 
@@ -26,6 +26,27 @@ Avoid calling VF action upon page load as the action becomes vulnerable to CSRF.
 **Use this rule by referencing it:**
 ``` xml
 <rule ref="category/vf/security.xml/VfCsrf" />
+```
+
+## VfLCCdetection
+
+**Since:** PMD 6.0.1
+
+**Priority:** Medium (3)
+
+Avoid using Beta feature Ligthtning Container Code (LCC)
+
+**This rule is defined by the following Java class:** [net.sourceforge.pmd.lang.vf.rule.security.VfLCCdetectionRule](https://github.com/pmd/pmd/blob/master/pmd-visualforce/src/main/java/net/sourceforge/pmd/lang/vf/rule/security/VfLCCdetectionRule.java)
+
+**Example(s):**
+
+``` vf
+<lightning:container aura:id="ReactApp"/>
+```
+
+**Use this rule by referencing it:**
+``` xml
+<rule ref="category/vf/security.xml/VfLCCdetection" />
 ```
 
 ## VfUnescapeEl

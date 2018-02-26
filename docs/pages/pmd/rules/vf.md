@@ -8,6 +8,7 @@ folder: pmd/rules
 {% include callout.html content="Rules that flag potential security flaws." %}
 
 *   [VfCsrf](pmd_rules_vf_security.html#vfcsrf): Avoid calling VF action upon page load as the action becomes vulnerable to CSRF.
+*   [VfLCCdetection](pmd_rules_vf_security.html#vflccdetection): Avoid using Beta feature Ligthtning Container Code (LCC)
 *   [VfUnescapeEl](pmd_rules_vf_security.html#vfunescapeel): Avoid unescaped user controlled content in EL as it results in XSS.
 
 ## Additional rulesets
@@ -18,6 +19,6 @@ folder: pmd/rules
 
     It contains the following rules:
 
-    [VfCsrf](pmd_rules_vf_security.html#vfcsrf), [VfUnescapeEl](pmd_rules_vf_security.html#vfunescapeel)
+    [VfCsrf](pmd_rules_vf_security.html#vfcsrf), [VfLCCdetection](pmd_rules_vf_security.html#vflccdetection), [VfUnescapeEl](pmd_rules_vf_security.html#vfunescapeel)
 
 

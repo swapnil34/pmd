@@ -10,5 +10,6 @@ Rules concerning basic VF guidelines.
 
     <rule ref="category/vf/security.xml/VfCsrf" deprecated="true" />
     <rule ref="category/vf/security.xml/VfUnescapeEl" deprecated="true" />
+    <rule ref="category/vf/security.xml/VfLCCdetection" deprecated="true" />
 
 </ruleset>
