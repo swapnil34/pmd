@@ -50,7 +50,6 @@ public class VfLCCdetectionRule extends AbstractVfRule {
 
     @Override
     public Object visit(ASTElement node, Object data) {
-    	System.out.println(node.getName());
         if (LIGHTNING_CONTAINER.equalsIgnoreCase(node.getName())) {
             
         	isLCC = true;

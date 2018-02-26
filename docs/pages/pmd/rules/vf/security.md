@@ -34,7 +34,7 @@ Avoid calling VF action upon page load as the action becomes vulnerable to CSRF.
 
 **Priority:** Medium (3)
 
-Don't use Beta feature Ligthtning Container Code (LCC)
+Avoid using Beta feature Ligthtning Container Code (LCC)
 
 **This rule is defined by the following Java class:** [net.sourceforge.pmd.lang.vf.rule.security.VfLCCdetectionRule](https://github.com/pmd/pmd/blob/master/pmd-visualforce/src/main/java/net/sourceforge/pmd/lang/vf/rule/security/VfLCCdetectionRule.java)
 
