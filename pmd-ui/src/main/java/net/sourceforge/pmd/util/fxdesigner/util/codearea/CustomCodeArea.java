@@ -152,7 +152,7 @@ public class CustomCodeArea extends CodeArea {
                 layer.reset(t.getValue());
                 this.paintCss();
             });
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             // nevermind
         }
     }
@@ -250,7 +250,7 @@ public class CustomCodeArea extends CodeArea {
     private Task<StyleSpans<Collection<String>>> computeHighlightingAsync(String text) {
         Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
             @Override
-            protected StyleSpans<Collection<String>> call() throws Exception {
+            protected StyleSpans<Collection<String>> call() {
                 return syntaxHighlighter.computeHighlighting(text);
             }
         };

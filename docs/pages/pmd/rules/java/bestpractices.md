@@ -5,7 +5,8 @@ permalink: pmd_rules_java_bestpractices.html
 folder: pmd/rules/java
 sidebaractiveurl: /pmd_rules_java.html
 editmepath: ../pmd-java/src/main/resources/category/java/bestpractices.xml
-keywords: Best Practices, AbstractClassWithoutAbstractMethod, AccessorClassGeneration, AccessorMethodGeneration, ArrayIsStoredDirectly, AvoidPrintStackTrace, AvoidReassigningParameters, AvoidStringBufferField, AvoidUsingHardCodedIP, CheckResultSet, ConstantsInInterface, DefaultLabelNotLastInSwitchStmt, ForLoopCanBeForeach, GuardLogStatement, JUnit4SuitesShouldUseSuiteAnnotation, JUnit4TestShouldUseAfterAnnotation, JUnit4TestShouldUseBeforeAnnotation, JUnit4TestShouldUseTestAnnotation, JUnitAssertionsShouldIncludeMessage, JUnitTestContainsTooManyAsserts, JUnitTestsShouldIncludeAssert, JUnitUseExpected, LooseCoupling, MethodReturnsInternalArray, OneDeclarationPerLine, PositionLiteralsFirstInCaseInsensitiveComparisons, PositionLiteralsFirstInComparisons, PreserveStackTrace, ReplaceEnumerationWithIterator, ReplaceHashtableWithMap, ReplaceVectorWithList, SwitchStmtsShouldHaveDefault, SystemPrintln, UnusedFormalParameter, UnusedImports, UnusedLocalVariable, UnusedPrivateField, UnusedPrivateMethod, UseAssertEqualsInsteadOfAssertTrue, UseAssertNullInsteadOfAssertTrue, UseAssertSameInsteadOfAssertTrue, UseAssertTrueInsteadOfAssertEquals, UseCollectionIsEmpty, UseVarargs
+keywords: Best Practices, AbstractClassWithoutAbstractMethod, AccessorClassGeneration, AccessorMethodGeneration, ArrayIsStoredDirectly, AvoidPrintStackTrace, AvoidReassigningParameters, AvoidStringBufferField, AvoidUsingHardCodedIP, CheckResultSet, ConstantsInInterface, DefaultLabelNotLastInSwitchStmt, ForLoopCanBeForeach, GuardLogStatement, JUnit4SuitesShouldUseSuiteAnnotation, JUnit4TestShouldUseAfterAnnotation, JUnit4TestShouldUseBeforeAnnotation, JUnit4TestShouldUseTestAnnotation, JUnitAssertionsShouldIncludeMessage, JUnitTestContainsTooManyAsserts, JUnitTestsShouldIncludeAssert, JUnitUseExpected, LooseCoupling, MethodReturnsInternalArray, MissingOverride, OneDeclarationPerLine, PositionLiteralsFirstInCaseInsensitiveComparisons, PositionLiteralsFirstInComparisons, PreserveStackTrace, ReplaceEnumerationWithIterator, ReplaceHashtableWithMap, ReplaceVectorWithList, SwitchStmtsShouldHaveDefault, SystemPrintln, UnusedFormalParameter, UnusedImports, UnusedLocalVariable, UnusedPrivateField, UnusedPrivateMethod, UseAssertEqualsInsteadOfAssertTrue, UseAssertNullInsteadOfAssertTrue, UseAssertSameInsteadOfAssertTrue, UseAssertTrueInsteadOfAssertEquals, UseCollectionIsEmpty, UseVarargs
+language: Java
 ---
 ## AbstractClassWithoutAbstractMethod
 
@@ -18,6 +19,7 @@ an incomplete implementation, which is to be completed by subclasses implementin
 abstract methods. If the class is intended to be used as a base class only (not to be instantiated
 directly) a protected constructor can be provided prevent direct instantiation.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration
  [@Abstract='true'
@@ -146,6 +148,7 @@ public class Foo {
 
 Avoid printStackTrace(); use a logger call instead.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression
  [PrimaryPrefix/Name[contains(@Image,'printStackTrace')]]
@@ -205,6 +208,7 @@ public class Foo {
 StringBuffers/StringBuilders can grow considerably, and so may become a source of memory leaks
 if held within objects with long lifetimes.
 
+**This rule is defined by the following XPath expression:**
 ```
 //FieldDeclaration/Type/ReferenceType/ClassOrInterfaceType[@Image = 'StringBuffer' or @Image = 'StringBuilder']
 ```
@@ -243,10 +247,10 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|checkAddressTypes|[IPv4, IPv6, IPv4 mapped IPv6]|Check for IP address types.|
-|pattern|^"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"$|Regular Expression|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|checkAddressTypes|IPv4 \| IPv6 \| IPv4 mapped IPv6|Check for IP address types.|yes. Delimiter is '\|'.|
+|pattern|^"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"$|Regular Expression|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -295,6 +299,7 @@ if (rst.next()) {    // result is properly examined and used
 Avoid constants in interfaces. Interfaces should define types, constants are implementation details
 better placed in classes or enums. See Effective Java, item 19.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration[@Interface='true'][$ignoreIfHasMethods='false' or not(.//MethodDeclaration)]//FieldDeclaration
 ```
@@ -326,9 +331,9 @@ public interface YetAnotherConstantInterface {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|ignoreIfHasMethods|true|Whether to ignore constants in interfaces if the interface defines any methods|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|ignoreIfHasMethods|true|Whether to ignore constants in interfaces if the interface defines any methods|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -343,6 +348,7 @@ public interface YetAnotherConstantInterface {
 
 By convention, the default label should be the last label in a switch statement.
 
+**This rule is defined by the following XPath expression:**
 ```
 //SwitchStatement
  [not(SwitchLabel[position() = last()][@Default='true'])]
@@ -428,10 +434,10 @@ otherwise skip the associate String creation and manipulation.
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|guardsMethods|[isTraceEnabled, isDebugEnabled, isInfoEnabled, isWarnEnabled, isErrorEnabled, isLoggable]|method use to guard the log statement|
-|logLevels|[trace, debug, info, warn, error, log, finest, finer, fine, info, warning, severe]|LogLevels to guard|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|guardsMethods|isTraceEnabled , isDebugEnabled , isInfoEnabled , isWarnEnabled , isErrorEnabled , isLoggable|method use to guard the log statement|yes. Delimiter is ','.|
+|logLevels|trace , debug , info , warn , error , log , finest , finer , fine , info , warning , severe|LogLevels to guard|yes. Delimiter is ','.|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -447,6 +453,7 @@ otherwise skip the associate String creation and manipulation.
 In JUnit 3, test suites are indicated by the suite() method. In JUnit 4, suites are indicated
 through the @RunWith(Suite.class) annotation.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceBodyDeclaration[MethodDeclaration/MethodDeclarator[@Image='suite']]
 [MethodDeclaration/ResultType/Type/ReferenceType/ClassOrInterfaceType[@Image='Test' or @Image = 'junit.framework.Test']]
@@ -483,6 +490,7 @@ public class GoodTest {
 In JUnit 3, the tearDown method was used to clean up all data entities required in running tests. 
 JUnit 4 skips the tearDown method and executes all methods annotated with @After after running each test
 
+**This rule is defined by the following XPath expression:**
 ```
 //CompilationUnit[not(ImportDeclaration/Name[starts-with(@Image, "org.testng")])]
 //ClassOrInterfaceBodyDeclaration[MethodDeclaration/MethodDeclarator[@Image='tearDown']]
@@ -518,6 +526,7 @@ public class MyTest2 {
 In JUnit 3, the setUp method was used to set up all data entities required in running tests. 
 JUnit 4 skips the setUp method and executes all methods annotated with @Before before all tests
 
+**This rule is defined by the following XPath expression:**
 ```
 //CompilationUnit[not(ImportDeclaration/Name[starts-with(@Image, "org.testng")])]
 //ClassOrInterfaceBodyDeclaration[MethodDeclaration/MethodDeclarator[@Image='setUp']]
@@ -553,9 +562,14 @@ public class MyTest2 {
 In JUnit 3, the framework executed all methods which started with the word test as a unit test. 
 In JUnit 4, only methods annotated with the @Test annotation are executed.
 
+**This rule is defined by the following XPath expression:**
 ```
-//ClassOrInterfaceBodyDeclaration[MethodDeclaration[@Public='true']/MethodDeclarator[starts-with(@Image,'test')]]
-[count(Annotation//Name[@Image='Test'])=0]
+//ClassOrInterfaceDeclaration[
+       matches(@Image, $testClassPattern)
+        or ExtendsList/ClassOrInterfaceType[pmd-java:typeIs('junit.framework.TestCase')]]
+
+    /ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration[MethodDeclaration[@Public=true()]/MethodDeclarator[starts-with(@Image, 'test')]]
+    [not(Annotation//Name[pmd-java:typeIs('org.junit.Test')])]
 ```
 
 **Example(s):**
@@ -572,6 +586,12 @@ public class MyTest {
     }
 }
 ```
+
+**This rule has the following properties:**
+
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|testClassPattern|Test|The regex pattern used to identify test classes|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -617,6 +637,7 @@ JUnit tests should not contain too many asserts.  Many asserts are indicative of
 it is harder to verify correctness.  Consider breaking the test scenario into multiple, shorter test scenarios.  
 Customize the maximum number of assertions used by this Rule to suit your needs.
 
+**This rule is defined by the following XPath expression:**
 ```
 //MethodDeclarator[(@Image[fn:matches(.,'^test')] or ../../Annotation/MarkerAnnotation/Name[@Image='Test']) and count(..//PrimaryPrefix/Name[@Image[fn:matches(.,'^assert')]]) > $maximumAsserts]
 ```
@@ -642,9 +663,9 @@ public class MyTestCase extends TestCase {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|maximumAsserts|1|Maximum number of Asserts in a test method|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|maximumAsserts|1|Maximum number of Asserts in a test method|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -783,6 +804,35 @@ public class SecureSystem {
 <rule ref="category/java/bestpractices.xml/MethodReturnsInternalArray" />
 ```
 
+## MissingOverride
+
+**Since:** PMD 6.2.0
+
+**Priority:** Medium (3)
+
+**Minimum Language Version:** Java 1.5
+
+Annotating overridden methods with @Override ensures at compile time that
+the method really overrides one, which helps refactoring and clarifies intent.
+
+**This rule is defined by the following Java class:** [net.sourceforge.pmd.lang.java.rule.bestpractices.MissingOverrideRule](https://github.com/pmd/pmd/blob/master/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/bestpractices/MissingOverrideRule.java)
+
+**Example(s):**
+
+``` java
+public class Foo implements Runnable {
+                // This method is overridden, and should have an @Override annotation
+                public void run() {
+
+                }
+            }
+```
+
+**Use this rule by referencing it:**
+``` xml
+<rule ref="category/java/bestpractices.xml/MissingOverride" />
+```
+
 ## OneDeclarationPerLine
 
 **Since:** PMD 5.0
@@ -792,6 +842,7 @@ public class SecureSystem {
 Java allows the use of several variables declaration of the same type on one line. However, it
 can lead to quite messy code. This rule looks for several declarations on the same line.
 
+**This rule is defined by the following XPath expression:**
 ```
 //LocalVariableDeclaration
    [count(VariableDeclarator) > 1]
@@ -813,9 +864,9 @@ String name,
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|strictMode|false|If true, mark combined declaration even if the declarations are on separate lines.|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|strictMode|false|If true, mark combined declaration even if the declarations are on separate lines.|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -831,6 +882,7 @@ String name,
 Position literals first in comparisons, if the second argument is null then NullPointerExceptions
 can be avoided, they will just return false.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression[
         PrimaryPrefix[Name
@@ -872,6 +924,7 @@ class Foo {
 Position literals first in comparisons, if the second argument is null then NullPointerExceptions
 can be avoided, they will just return false.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression[
     PrimaryPrefix[Name[(ends-with(@Image, '.equals'))]]
@@ -951,6 +1004,7 @@ public class Foo {
 
 Consider replacing Enumeration usages with the newer java.util.Iterator
 
+**This rule is defined by the following XPath expression:**
 ```
 //ImplementsList/ClassOrInterfaceType[@Image='Enumeration']
 ```
@@ -982,6 +1036,7 @@ public class Foo implements Enumeration {
 
 Consider replacing Hashtable usage with the newer java.util.Map if thread safety is not required.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Type/ReferenceType/ClassOrInterfaceType[@Image='Hashtable']
 ```
@@ -1009,6 +1064,7 @@ public class Foo {
 
 Consider replacing Vector usages with the newer java.util.ArrayList if expensive thread-safe operations are not required.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Type/ReferenceType/ClassOrInterfaceType[@Image='Vector']
 ```
@@ -1036,8 +1092,9 @@ public class Foo {
 
 All switch statements should include a default option to catch any unspecified values.
 
+**This rule is defined by the following XPath expression:**
 ```
-//SwitchStatement[not(SwitchLabel[@Default='true'])]
+//SwitchStatement[@DefaultCase = false() and @ExhaustiveEnumSwitch = false()]
 ```
 
 **Example(s):**
@@ -1068,6 +1125,7 @@ References to System.(out|err).print are usually intended for debugging purposes
 the codebase even in production code. By using a logger one can enable/disable this behaviour at
 will (and by priority) and avoid clogging the Standard out log.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Name[
     starts-with(@Image, 'System.out.print')
@@ -1116,9 +1174,9 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|checkAll|false|Check all methods, including non-private ones|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|checkAll|false|Check all methods, including non-private ones|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1198,6 +1256,12 @@ public class Something {
 }
 ```
 
+**This rule has the following properties:**
+
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|ignoredAnnotations|lombok.Setter \| lombok.Getter \| lombok.Builder \| lombok.Data \| lombok.RequiredArgsConstructor \| lombok.AllArgsConstructor \| lombok.Value \| lombok.NoArgsConstructor \| java.lang.Deprecated \| javafx.fxml.FXML|Fully qualified names of the annotation types that should be ignored by this rule|yes. Delimiter is '\|'.|
+
 **Use this rule by referencing it:**
 ``` xml
 <rule ref="category/java/bestpractices.xml/UnusedPrivateField" />
@@ -1221,6 +1285,12 @@ public class Something {
 }
 ```
 
+**This rule has the following properties:**
+
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|ignoredAnnotations|java.lang.Deprecated|Fully qualified names of the annotation types that should be ignored by this rule|yes. Delimiter is '\|'.|
+
 **Use this rule by referencing it:**
 ``` xml
 <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod" />
@@ -1234,6 +1304,7 @@ public class Something {
 
 This rule detects JUnit assertions in object equality. These assertions should be made by more specific methods, like assertEquals.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression[
     PrimaryPrefix/Name[@Image = 'assertTrue']
@@ -1241,7 +1312,7 @@ This rule detects JUnit assertions in object equality. These assertions should b
     PrimarySuffix/Arguments/ArgumentList/Expression/PrimaryExpression/PrimaryPrefix/Name
     [ends-with(@Image, '.equals')]
 ]
-[ancestor::ClassOrInterfaceDeclaration[//ClassOrInterfaceType[pmd-java:typeof(@Image, 'junit.framework.TestCase','TestCase')] or //MarkerAnnotation/Name[pmd-java:typeof(@Image, 'org.junit.Test', 'Test')]]]
+[ancestor::ClassOrInterfaceDeclaration[//ClassOrInterfaceType[pmd-java:typeIs('junit.framework.TestCase')] or //MarkerAnnotation/Name[pmd-java:typeIs('org.junit.Test')]]]
 ```
 
 **Example(s):**
@@ -1270,6 +1341,7 @@ public class FooTest extends TestCase {
 This rule detects JUnit assertions in object references equality. These assertions should be made by 
 more specific methods, like assertNull, assertNotNull.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression[
  PrimaryPrefix/Name[@Image = 'assertTrue' or @Image = 'assertFalse']
@@ -1278,7 +1350,7 @@ more specific methods, like assertNull, assertNotNull.
   Expression/EqualityExpression/PrimaryExpression/PrimaryPrefix/Literal/NullLiteral
  ]
 ]
-[ancestor::ClassOrInterfaceDeclaration[//ClassOrInterfaceType[pmd-java:typeof(@Image, 'junit.framework.TestCase','TestCase')] or //MarkerAnnotation/Name[pmd-java:typeof(@Image, 'org.junit.Test', 'Test')]]]
+[ancestor::ClassOrInterfaceDeclaration[//ClassOrInterfaceType[pmd-java:typeIs('junit.framework.TestCase')] or //MarkerAnnotation/Name[pmd-java:typeIs('org.junit.Test')]]]
 ```
 
 **Example(s):**
@@ -1309,6 +1381,7 @@ public class FooTest extends TestCase {
 This rule detects JUnit assertions in object references equality. These assertions should be made 
 by more specific methods, like assertSame, assertNotSame.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression[
     PrimaryPrefix/Name
@@ -1317,7 +1390,7 @@ by more specific methods, like assertSame, assertNotSame.
 [PrimarySuffix/Arguments
  /ArgumentList/Expression
  /EqualityExpression[count(.//NullLiteral) = 0]]
-[ancestor::ClassOrInterfaceDeclaration[//ClassOrInterfaceType[pmd-java:typeof(@Image, 'junit.framework.TestCase','TestCase')] or //MarkerAnnotation/Name[pmd-java:typeof(@Image, 'org.junit.Test', 'Test')]]]
+[ancestor::ClassOrInterfaceDeclaration[//ClassOrInterfaceType[pmd-java:typeIs('junit.framework.TestCase')] or //MarkerAnnotation/Name[pmd-java:typeIs('org.junit.Test')]]]
 ```
 
 **Example(s):**
@@ -1345,6 +1418,7 @@ public class FooTest extends TestCase {
 
 When asserting a value is the same as a literal or Boxed boolean, use assertTrue/assertFalse, instead of assertEquals.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression[PrimaryPrefix/Name[@Image = 'assertEquals']]
 [
@@ -1428,6 +1502,7 @@ Java 5 introduced the varargs parameter declaration for methods and constructors
 sugar provides flexibility for users of these methods and constructors, allowing them to avoid
 having to deal with the creation of an array.
 
+**This rule is defined by the following XPath expression:**
 ```
 //FormalParameters/FormalParameter
     [position()=last()]

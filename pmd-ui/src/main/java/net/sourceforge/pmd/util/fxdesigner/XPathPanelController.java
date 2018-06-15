@@ -6,12 +6,15 @@ package net.sourceforge.pmd.util.fxdesigner;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang3.StringUtils;
+import org.controlsfx.validation.ValidationSupport;
+import org.controlsfx.validation.Validator;
 import org.reactfx.EventStreams;
 import org.reactfx.value.Val;
 import org.reactfx.value.Var;
@@ -25,6 +28,7 @@ import net.sourceforge.pmd.util.fxdesigner.model.LogEntry.Category;
 import net.sourceforge.pmd.util.fxdesigner.model.ObservableXPathRuleBuilder;
 import net.sourceforge.pmd.util.fxdesigner.model.XPathEvaluationException;
 import net.sourceforge.pmd.util.fxdesigner.model.XPathEvaluator;
+import net.sourceforge.pmd.util.fxdesigner.popups.ExportXPathWizardController;
 import net.sourceforge.pmd.util.fxdesigner.util.DesignerUtil;
 import net.sourceforge.pmd.util.fxdesigner.util.beans.SettingsOwner;
 import net.sourceforge.pmd.util.fxdesigner.util.beans.SettingsPersistenceUtil.PersistentProperty;
@@ -40,11 +44,18 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 
 /**
@@ -56,16 +67,14 @@ import javafx.stage.Stage;
  */
 public class XPathPanelController implements Initializable, SettingsOwner {
 
+    private static final Duration XPATH_REFRESH_DELAY = Duration.ofMillis(100);
     private final DesignerRoot designerRoot;
     private final MainDesignerController parent;
-
     private final XPathEvaluator xpathEvaluator = new XPathEvaluator();
-
     private final ObservableXPathRuleBuilder ruleBuilder = new ObservableXPathRuleBuilder();
 
-
     @FXML
-    private PropertyTableView propertyView;
+    private PropertyTableView propertyTableView;
     @FXML
     private CustomCodeArea xpathExpressionArea;
     @FXML
@@ -73,6 +82,7 @@ public class XPathPanelController implements Initializable, SettingsOwner {
     @FXML
     private ListView<Node> xpathResultListView;
     // Actually a child of the main view toolbar, but this controller is responsible for it
+    @SuppressWarnings("PMD.SingularField")
     private ChoiceBox<String> xpathVersionChoiceBox;
 
 
@@ -88,11 +98,64 @@ public class XPathPanelController implements Initializable, SettingsOwner {
     public void initialize(URL location, ResourceBundle resources) {
         xpathExpressionArea.setSyntaxHighlightingEnabled(new XPathSyntaxHighlighter());
 
+        initGenerateXPathFromStackTrace();
+
         EventStreams.valuesOf(xpathResultListView.getSelectionModel().selectedItemProperty())
+                    .conditionOn(xpathResultListView.focusedProperty())
                     .filter(Objects::nonNull)
                     .subscribe(parent::onNodeItemSelected);
 
         Platform.runLater(this::bindToParent);
+
+        xpathExpressionArea.richChanges()
+                           .filter(t -> !t.isIdentity())
+                           .successionEnds(XPATH_REFRESH_DELAY)
+                           // Reevaluate XPath anytime the expression or the XPath version changes
+                           .or(xpathVersionProperty().changes())
+                           .subscribe(tick -> parent.refreshXPathResults());
+    }
+
+
+    private void initGenerateXPathFromStackTrace() {
+
+        ContextMenu menu = new ContextMenu();
+
+        MenuItem item = new MenuItem("Generate from stack trace...");
+        item.setOnAction(e -> {
+            try {
+                Stage popup = new Stage();
+                FXMLLoader loader = new FXMLLoader(DesignerUtil.getFxml("generate-xpath-from-stack-trace.fxml"));
+                Parent root = loader.load();
+                Button button = (Button) loader.getNamespace().get("generateButton");
+                TextArea area = (TextArea) loader.getNamespace().get("stackTraceArea");
+
+                ValidationSupport validation = new ValidationSupport();
+
+                validation.registerValidator(area, Validator.createEmptyValidator("The stack trace may not be empty"));
+                button.disableProperty().bind(validation.invalidProperty());
+
+                button.setOnAction(f -> {
+                    DesignerUtil.stackTraceToXPath(area.getText()).ifPresent(xpathExpressionArea::replaceText);
+                    popup.close();
+                });
+
+                popup.setScene(new Scene(root));
+                popup.initStyle(StageStyle.UTILITY);
+                popup.initModality(Modality.WINDOW_MODAL);
+                popup.initOwner(designerRoot.getMainStage());
+                popup.show();
+            } catch (IOException e1) {
+                throw new RuntimeException(e1);
+            }
+        });
+
+        menu.getItems().add(item);
+
+        xpathExpressionArea.addEventHandler(MouseEvent.MOUSE_CLICKED, t -> {
+            if (t.getButton() == MouseButton.SECONDARY) {
+                menu.show(xpathExpressionArea, t.getScreenX(), t.getScreenY());
+            }
+        });
     }
 
 
@@ -105,7 +168,7 @@ public class XPathPanelController implements Initializable, SettingsOwner {
         DesignerUtil.rewire(getRuleBuilder().xpathExpressionProperty(), xpathExpressionProperty());
 
         DesignerUtil.rewire(getRuleBuilder().rulePropertiesProperty(),
-                            propertyView.rulePropertiesProperty(), propertyView::setRuleProperties);
+                            propertyTableView.rulePropertiesProperty(), propertyTableView::setRuleProperties);
     }
 
 
@@ -132,9 +195,9 @@ public class XPathPanelController implements Initializable, SettingsOwner {
 
         try {
             String xpath = getXpathExpression();
-
             if (StringUtils.isBlank(xpath)) {
                 xpathResultListView.getItems().clear();
+                invalidateResults(false);
                 return;
             }
 
@@ -152,7 +215,8 @@ public class XPathPanelController implements Initializable, SettingsOwner {
         }
 
         xpathResultListView.refresh();
-        xpathExpressionArea.requestFocus();
+
+
     }
 
 
@@ -163,7 +227,6 @@ public class XPathPanelController implements Initializable, SettingsOwner {
 
 
     public void showExportXPathToRuleWizard() throws IOException {
-        // doesn't work for some reason
         ExportXPathWizardController wizard
                 = new ExportXPathWizardController(xpathExpressionProperty());
 

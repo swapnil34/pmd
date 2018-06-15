@@ -6,6 +6,7 @@ folder: pmd/rules/java
 sidebaractiveurl: /pmd_rules_java.html
 editmepath: ../pmd-java/src/main/resources/category/java/performance.xml
 keywords: Performance, AddEmptyString, AppendCharacterWithChar, AvoidArrayLoops, AvoidFileStream, AvoidInstantiatingObjectsInLoops, AvoidUsingShortType, BigIntegerInstantiation, BooleanInstantiation, ByteInstantiation, ConsecutiveAppendsShouldReuse, ConsecutiveLiteralAppends, InefficientEmptyStringCheck, InefficientStringBuffering, InsufficientStringBufferDeclaration, IntegerInstantiation, LongInstantiation, OptimizableToArrayCall, RedundantFieldInitializer, SimplifyStartsWith, ShortInstantiation, StringInstantiation, StringToString, TooFewBranchesForASwitchStatement, UnnecessaryWrapperObjectCreation, UseArrayListInsteadOfVector, UseArraysAsList, UseIndexOfChar, UselessStringValueOf, UseStringBufferForStringAppends, UseStringBufferLength
+language: Java
 ---
 ## AddEmptyString
 
@@ -16,6 +17,7 @@ keywords: Performance, AddEmptyString, AppendCharacterWithChar, AvoidArrayLoops,
 The conversion of literals to strings by concatenating them with empty strings is inefficient.
 It is much better to use one of the type-specific toString() methods instead.
 
+**This rule is defined by the following XPath expression:**
 ```
 //AdditiveExpression/PrimaryExpression/PrimaryPrefix/Literal[@Image='""']
 ```
@@ -65,6 +67,7 @@ sb.append('a');     // use this instead
 
 Instead of manually copying data between two arrays, use the efficient Arrays.copyOf or System.arraycopy method instead.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Statement[(ForStatement or WhileStatement) and
 count(*//AssignmentOperator[@Image = '='])=1
@@ -126,12 +129,13 @@ The FileReader and FileWriter constructors instantiate FileInputStream and FileO
 * Use `Files.newBufferedReader(Paths.get(fileName))` instead of `new FileReader(fileName)`.
 * Use `Files.newBufferedWriter(Paths.get(fileName))` instead of `new FileWriter(fileName)`.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryPrefix/AllocationExpression/ClassOrInterfaceType[
-       typeof(@Image, 'java.io.FileInputStream', 'FileInputStream')
-    or typeof(@Image, 'java.io.FileOutputStream', 'FileOutputStream')
-    or typeof(@Image, 'java.io.FileReader', 'FileReader')
-    or typeof(@Image, 'java.io.FileWriter', 'FileWriter')
+       typeIs('java.io.FileInputStream')
+    or typeIs('java.io.FileOutputStream')
+    or typeIs('java.io.FileReader')
+    or typeIs('java.io.FileWriter')
   ]
 ```
 
@@ -200,8 +204,19 @@ arithmetic capabilities for the short type: the JVM must convert the short into 
 and convert the int back to a short. Thus any storage gains found through use of the 'short' type may be offset by
 adverse impacts on performance.
 
+**This rule is defined by the following XPath expression:**
 ```
-//PrimitiveType[@Image = 'short'][name(../..) != 'CastExpression']
+//FieldDeclaration/Type/PrimitiveType[@Image = 'short']
+|
+//ClassOrInterfaceBodyDeclaration[not(Annotation/MarkerAnnotation/Name[typeIs('java.lang.Override')])]
+    /MethodDeclaration/ResultType/Type/PrimitiveType[@Image = 'short']
+|
+//ClassOrInterfaceBodyDeclaration[not(Annotation/MarkerAnnotation/Name[typeIs('java.lang.Override')])]
+    /MethodDeclaration/MethodDeclarator/FormalParameters/FormalParameter/Type/PrimitiveType[@Image = 'short']
+|
+//LocalVariableDeclaration/Type/PrimitiveType[@Image = 'short']
+|
+//AnnotationMethodDeclaration/Type/PrimitiveType[@Image = 'short']
 ```
 
 **Example(s):**
@@ -281,11 +296,11 @@ Calling new Byte() causes memory allocation that can be avoided by the static By
 It makes use of an internal cache that recycles earlier instances making it more memory efficient.
 Note that new Byte() is deprecated since JDK 9 for that reason.
 
+**This rule is defined by the following XPath expression:**
 ```
-//PrimaryPrefix/AllocationExpression
+//AllocationExpression
 [not (ArrayDimsAndInits)
-and (ClassOrInterfaceType/@Image='Byte'
-or ClassOrInterfaceType/@Image='java.lang.Byte')]
+and ClassOrInterfaceType[typeIs('java.lang.Byte')]]
 ```
 
 **Example(s):**
@@ -359,9 +374,9 @@ buf.append("1m");           // good
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|threshold|1|Max consecutive appends|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|threshold|1|Max consecutive appends|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -374,12 +389,27 @@ buf.append("1m");           // good
 
 **Priority:** Medium (3)
 
-String.trim().length() is an inefficient way to check if a String is really empty, as it
-creates a new String object just to check its size. Consider creating a static function that
-loops through a string, checking Character.isWhitespace() on each character and returning
-false if a non-whitespace character is found. You can refer to Apache's StringUtils#isBlank (in commons-lang),
-Spring's StringUtils#hasText (in the Spring framework) or Google's CharMatcher#whitespace (in Guava) for
-existing implementations.
+String.trim().length() == 0 (or String.trim().isEmpty() for the same reason) is an inefficient
+way to check if a String is really blank, as it creates a new String object just to check its size.
+Consider creating a static function that loops through a string, checking Character.isWhitespace()
+on each character and returning false if a non-whitespace character is found. A Smarter code to
+check for an empty string would be:
+
+```java
+private boolean checkTrimEmpty(String str) {
+    for(int i = 0; i < str.length(); i++) {
+        if(!Character.isWhitespace(str.charAt(i))) {
+            return false;
+        }
+    }
+    return true;
+}
+```
+
+You can refer to Apache's StringUtils#isBlank (in commons-lang),
+Spring's StringUtils#hasText (in the Spring framework) or Google's
+CharMatcher#whitespace (in Guava) for existing implementations (some might
+include the check for != null).
 
 **This rule is defined by the following Java class:** [net.sourceforge.pmd.lang.java.rule.performance.InefficientEmptyStringCheckRule](https://github.com/pmd/pmd/blob/master/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/performance/InefficientEmptyStringCheckRule.java)
 
@@ -387,7 +417,7 @@ existing implementations.
 
 ``` java
 public void bar(String string) {
-    if (string != null && string.trim().size() > 0) {
+    if (string != null && string.trim().length() > 0) {
         doSomething();
     }
 }
@@ -464,12 +494,11 @@ Calling new Integer() causes memory allocation that can be avoided by the static
 It makes use of an internal cache that recycles earlier instances making it more memory efficient.
 Note that new Integer() is deprecated since JDK 9 for that reason.
 
+**This rule is defined by the following XPath expression:**
 ```
-//PrimaryPrefix
- /AllocationExpression
+//AllocationExpression
   [not (ArrayDimsAndInits)
-   and (ClassOrInterfaceType/@Image='Integer'
-    or ClassOrInterfaceType/@Image='java.lang.Integer')]
+   and ClassOrInterfaceType[typeIs('java.lang.Integer')]]
 ```
 
 **Example(s):**
@@ -495,12 +524,11 @@ Calling new Long() causes memory allocation that can be avoided by the static Lo
 It makes use of an internal cache that recycles earlier instances making it more memory efficient.
 Note that new Long() is deprecated since JDK 9 for that reason.
 
+**This rule is defined by the following XPath expression:**
 ```
-//PrimaryPrefix
-/AllocationExpression
+//AllocationExpression
 [not (ArrayDimsAndInits)
-and (ClassOrInterfaceType/@Image='Long'
-or ClassOrInterfaceType/@Image='java.lang.Long')]
+and ClassOrInterfaceType[typeIs('java.lang.Long')]]
 ```
 
 **Example(s):**
@@ -536,6 +564,7 @@ See also [Arrays of Wisdom of the Ancients](https://shipilev.net/blog/2016/array
 Note: If you don't need an array of the correct type, then the simple `toArray()` method without an array
 is faster, but returns only an array of type `Object[]`.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression
 [PrimaryPrefix/Name[ends-with(@Image, 'toArray')]]
@@ -614,12 +643,11 @@ Calling new Short() causes memory allocation that can be avoided by the static S
 It makes use of an internal cache that recycles earlier instances making it more memory efficient.
 Note that new Short() is deprecated since JDK 9 for that reason.
 
+**This rule is defined by the following XPath expression:**
 ```
-//PrimaryPrefix
-/AllocationExpression
+//AllocationExpression
 [not (ArrayDimsAndInits)
-and (ClassOrInterfaceType/@Image='Short'
-or ClassOrInterfaceType/@Image='java.lang.Short')]
+and ClassOrInterfaceType[typeIs('java.lang.Short')]]
 ```
 
 **Example(s):**
@@ -644,6 +672,7 @@ public class Foo {
 Since it passes in a literal of length 1, calls to (string).startsWith can be rewritten using (string).charAt(0)
 at the expense of some readability.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression
  [PrimaryPrefix/Name
@@ -732,6 +761,7 @@ Switch statements are intended to be used to support complex branching behaviour
 cases is ill-advised, since switches are not as easy to understand as if-then statements. In these cases use the
 if-then statement to increase code readability.
 
+**This rule is defined by the following XPath expression:**
 ```
 //SwitchStatement[
     (count(.//SwitchLabel) < $minimumNumberCaseForASwitch)
@@ -757,9 +787,9 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|minimumNumberCaseForASwitch|3|Minimum number of branches for a switch|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|minimumNumberCaseForASwitch|3|Minimum number of branches for a switch|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -810,6 +840,7 @@ public int convert(String s) {
 
 ArrayList is a much better Collection implementation than Vector if thread-safe operation is not required.
 
+**This rule is defined by the following XPath expression:**
 ```
 //CompilationUnit[count(ImportDeclaration) = 0 or count(ImportDeclaration/Name[@Image='java.util.Vector']) > 0]
   //AllocationExpression/ClassOrInterfaceType
@@ -849,6 +880,7 @@ You must use new ArrayList<>(Arrays.asList(...)) if that is inconvenient for you
 
 	
 
+**This rule is defined by the following XPath expression:**
 ```
 //Statement[
     (ForStatement) and (ForStatement//VariableInitializer//Literal[@IntLiteral='true' and @Image='0']) and (count(.//IfStatement)=0)
@@ -976,7 +1008,7 @@ public class Foo {
         a += " bar";
         // better would be:
         // StringBuilder a = new StringBuilder("foo");
-        // a.append(" bar);
+        // a.append(" bar");
     }
 }
 ```

@@ -6,6 +6,7 @@ folder: pmd/rules/plsql
 sidebaractiveurl: /pmd_rules_plsql.html
 editmepath: ../pmd-plsql/src/main/resources/category/plsql/bestpractices.xml
 keywords: Best Practices, TomKytesDespair
+language: PLSQL
 ---
 ## TomKytesDespair
 
@@ -15,6 +16,7 @@ keywords: Best Practices, TomKytesDespair
 
 "WHEN OTHERS THEN NULL" hides all errors - (Re)RAISE an exception or call RAISE_APPLICATION_ERROR
 
+**This rule is defined by the following XPath expression:**
 ```
 //ExceptionHandler[QualifiedName/@Image='OTHERS' and upper-case(Statement/UnlabelledStatement/Expression/@Image)='NULL']
 ```

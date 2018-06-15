@@ -6,6 +6,7 @@ folder: pmd/rules/plsql
 sidebaractiveurl: /pmd_rules_plsql.html
 editmepath: ../pmd-plsql/src/main/resources/category/plsql/codestyle.xml
 keywords: Code Style, MisplacedPragma
+language: PLSQL
 ---
 ## MisplacedPragma
 
@@ -17,6 +18,7 @@ Oracle states that the PRAQMA AUTONOMOUS_TRANSACTION must be in the declaration 
 but the code does not complain, when being compiled on the 11g DB.
 https://docs.oracle.com/cd/B28359_01/appdev.111/b28370/static.htm#BABIIHBJ
 
+**This rule is defined by the following XPath expression:**
 ```
 //ProgramUnit/Pragma
 ```

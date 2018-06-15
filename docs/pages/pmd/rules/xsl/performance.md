@@ -6,6 +6,7 @@ folder: pmd/rules/xsl
 sidebaractiveurl: /pmd_rules_xsl.html
 editmepath: ../pmd-xml/src/main/resources/category/xsl/performance.xml
 keywords: Performance, AvoidAxisNavigation
+language: XSL
 ---
 ## AvoidAxisNavigation
 
@@ -18,6 +19,7 @@ through 100% of the document in the worst case.  Also, try to avoid using 'desce
 or 'descendant-self' axes, as if you're at the top of the Document, it necessarily means
 cutting through 100% of the document.
 
+**This rule is defined by the following XPath expression:**
 ```
 //node()[
   contains(@select,'preceeding::')
@@ -43,9 +45,9 @@ cutting through 100% of the document.
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|checkSelfDescendantAbreviation|false|descendant::self abreviation, '//', will also trigger this rule.|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|checkSelfDescendantAbreviation|false|descendant::self abreviation, '//', will also trigger this rule.|no|
 
 **Use this rule by referencing it:**
 ``` xml

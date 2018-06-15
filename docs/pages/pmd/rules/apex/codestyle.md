@@ -6,6 +6,7 @@ folder: pmd/rules/apex
 sidebaractiveurl: /pmd_rules_apex.html
 editmepath: ../pmd-apex/src/main/resources/category/apex/codestyle.xml
 keywords: Code Style, ClassNamingConventions, IfElseStmtsMustUseBraces, IfStmtsMustUseBraces, ForLoopsMustUseBraces, MethodNamingConventions, VariableNamingConventions, WhileLoopsMustUseBraces
+language: Apex
 ---
 ## ClassNamingConventions
 
@@ -25,11 +26,11 @@ public class Foo {}
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|cc_categories|[Style]|Code Climate Categories|
-|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|
-|cc_block_highlighting|false|Code Climate Block Highlighting|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|cc_categories|Style|Code Climate Categories|yes. Delimiter is '\|'.|
+|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|no|
+|cc_block_highlighting|false|Code Climate Block Highlighting|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -46,6 +47,7 @@ Avoid using 'for' statements without using surrounding braces. If the code forma
 indentation is lost then it becomes difficult to separate the code being controlled
 from the rest.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ForLoopStatement/BlockStatement[@CurlyBrace='false']
 |
@@ -65,11 +67,11 @@ for (int i = 0; i < 42; i++) { // preferred approach
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|cc_categories|[Style]|Code Climate Categories|
-|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|
-|cc_block_highlighting|false|Code Climate Block Highlighting|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|cc_categories|Style|Code Climate Categories|yes. Delimiter is '\|'.|
+|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|no|
+|cc_block_highlighting|false|Code Climate Block Highlighting|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -86,6 +88,7 @@ Avoid using if..else statements without using surrounding braces. If the code fo
 or indentation is lost then it becomes difficult to separate the code being controlled
 from the rest.
 
+**This rule is defined by the following XPath expression:**
 ```
 //IfBlockStatement/BlockStatement[@CurlyBrace='false'][count(child::*) > 0]
 |
@@ -107,11 +110,11 @@ else
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|cc_categories|[Style]|Code Climate Categories|
-|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|
-|cc_block_highlighting|false|Code Climate Block Highlighting|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|cc_categories|Style|Code Climate Categories|yes. Delimiter is '\|'.|
+|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|no|
+|cc_block_highlighting|false|Code Climate Block Highlighting|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -128,6 +131,7 @@ Avoid using if statements without using braces to surround the code block. If th
 formatting or indentation is lost then it becomes difficult to separate the code being
 controlled from the rest.
 
+**This rule is defined by the following XPath expression:**
 ```
 //IfBlockStatement/BlockStatement[@CurlyBrace='false']
 ```
@@ -145,11 +149,11 @@ if (foo) {  // preferred approach
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|cc_categories|[Style]|Code Climate Categories|
-|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|
-|cc_block_highlighting|false|Code Climate Block Highlighting|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|cc_categories|Style|Code Climate Categories|yes. Delimiter is '\|'.|
+|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|no|
+|cc_block_highlighting|false|Code Climate Block Highlighting|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -177,11 +181,11 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|cc_categories|[Style]|Code Climate Categories|
-|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|
-|cc_block_highlighting|false|Code Climate Block Highlighting|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|cc_categories|Style|Code Climate Categories|yes. Delimiter is '\|'.|
+|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|no|
+|cc_block_highlighting|false|Code Climate Block Highlighting|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -212,22 +216,22 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|parameterSuffix|[]|Method parameter variable suffixes|
-|parameterPrefix|[]|Method parameter variable prefixes|
-|localSuffix|[]|Local variable suffixes|
-|localPrefix|[]|Local variable prefixes|
-|memberSuffix|[]|Member variable suffixes|
-|memberPrefix|[]|Member variable prefixes|
-|staticSuffix|[]|Static variable suffixes|
-|staticPrefix|[]|Static variable prefixes|
-|checkParameters|true|Check constructor and method parameter variables|
-|checkLocals|true|Check local variables|
-|cc_categories|[Style]|Code Climate Categories|
-|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|
-|cc_block_highlighting|false|Code Climate Block Highlighting|
-|checkMembers|true|Check member variables|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|parameterSuffix||Method parameter variable suffixes|yes. Delimiter is ','.|
+|parameterPrefix||Method parameter variable prefixes|yes. Delimiter is ','.|
+|localSuffix||Local variable suffixes|yes. Delimiter is ','.|
+|localPrefix||Local variable prefixes|yes. Delimiter is ','.|
+|memberSuffix||Member variable suffixes|yes. Delimiter is ','.|
+|memberPrefix||Member variable prefixes|yes. Delimiter is ','.|
+|staticSuffix||Static variable suffixes|yes. Delimiter is ','.|
+|staticPrefix||Static variable prefixes|yes. Delimiter is ','.|
+|checkParameters|true|Check constructor and method parameter variables|no|
+|checkLocals|true|Check local variables|no|
+|cc_categories|Style|Code Climate Categories|yes. Delimiter is '\|'.|
+|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|no|
+|cc_block_highlighting|false|Code Climate Block Highlighting|no|
+|checkMembers|true|Check member variables|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -244,6 +248,7 @@ Avoid using 'while' statements without using braces to surround the code block. 
 formatting or indentation is lost then it becomes difficult to separate the code being
 controlled from the rest.
 
+**This rule is defined by the following XPath expression:**
 ```
 //WhileLoopStatement/BlockStatement[@CurlyBrace='false']
 ```
@@ -261,11 +266,11 @@ while (true) {  // preferred approach
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|cc_categories|[Style]|Code Climate Categories|
-|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|
-|cc_block_highlighting|false|Code Climate Block Highlighting|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|cc_categories|Style|Code Climate Categories|yes. Delimiter is '\|'.|
+|cc_remediation_points_multiplier|1|Code Climate Remediation Points multiplier|no|
+|cc_block_highlighting|false|Code Climate Block Highlighting|no|
 
 **Use this rule by referencing it:**
 ``` xml

@@ -6,6 +6,7 @@ folder: pmd/rules/ecmascript
 sidebaractiveurl: /pmd_rules_ecmascript.html
 editmepath: ../pmd-javascript/src/main/resources/category/ecmascript/errorprone.xml
 keywords: Error Prone, AvoidTrailingComma, EqualComparison, InnaccurateNumericLiteral
+language: Ecmascript
 ---
 ## AvoidTrailingComma
 
@@ -15,6 +16,7 @@ keywords: Error Prone, AvoidTrailingComma, EqualComparison, InnaccurateNumericLi
 
 This rule helps improve code portability due to differences in browser treatment of trailing commas in object or array literals.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ObjectLiteral[$allowObjectLiteral = "false" and @TrailingComma = 'true']
 |
@@ -35,10 +37,10 @@ function(arg) {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|allowObjectLiteral|false|Allow a trailing comma within an object literal|
-|allowArrayLiteral|false|Allow a trailing comma within an array literal|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|allowObjectLiteral|false|Allow a trailing comma within an object literal|no|
+|allowArrayLiteral|false|Allow a trailing comma within an array literal|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -54,6 +56,7 @@ function(arg) {
 Using == in condition may lead to unexpected results, as the variables are automatically casted to be of the
 same type. The === operator avoids the casting.
 
+**This rule is defined by the following XPath expression:**
 ```
 //InfixExpression[(@Image = "==" or @Image = "!=")
   and
@@ -98,12 +101,9 @@ if (someVar != 3) {
 The numeric literal will have a different value at runtime, which can happen if you provide too much
 precision in a floating point number.  This may result in numeric calculations being in error.
 
+**This rule is defined by the following XPath expression:**
 ```
-//NumberLiteral[
-    @Image != @Number
-    and translate(@Image, "e", "E") != @Number
-    and concat(@Image, ".0") != @Number
-    and @Image != substring-before(translate(@Number, ".", ""), "E")]
+//NumberLiteral[@NormalizedImage != @Number]
 ```
 
 **Example(s):**

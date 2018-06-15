@@ -5,11 +5,13 @@
 
 package net.sourceforge.pmd.lang.ast;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.jaxen.JaxenException;
 import org.w3c.dom.Document;
 
+import net.sourceforge.pmd.lang.ast.xpath.Attribute;
 import net.sourceforge.pmd.lang.dfa.DataFlowNode;
 
 /**
@@ -84,16 +86,27 @@ public interface Node {
     Node jjtGetChild(int index);
 
     /**
-     * Return the number of children the node has.
+     * Returns the number of children the node has.
      */
     int jjtGetNumChildren();
 
     int jjtGetId();
 
+
+    /**
+     * Returns a string token, usually filled-in by the parser, which describes some textual
+     * characteristic of this node. This is usually an identifier, but you should check that
+     * using the Designer. On most nodes though, this method returns {@code null}.
+     */
     String getImage();
 
     void setImage(String image);
 
+    /**
+     * Returns true if this node's image is equal to the given string.
+     *
+     * @param image The image to check
+     */
     boolean hasImageEqualTo(String image);
 
     int getBeginLine();
@@ -108,11 +121,19 @@ public interface Node {
 
     void setDataFlowNode(DataFlowNode dataFlowNode);
 
+
+    /**
+     * Returns true if this node is considered a boundary by traversal methods.
+     * Traversal methods such as {@link #getFirstDescendantOfType(Class)} don't
+     * look past such boundaries by default, which is usually the expected thing
+     * to do. For example, in Java, lambdas and nested classes are considered
+     * find boundaries.
+     */
     boolean isFindBoundary();
 
 
     /**
-     * Returns the n-th parent or null if there are not {@code n} ancestors
+     * Returns the n-th parent or null if there are less than {@code n} ancestors.
      *
      * @param n how many ancestors to iterate over.
      *
@@ -147,6 +168,18 @@ public interface Node {
      */
     <T> List<T> getParentsOfType(Class<T> parentType);
 
+
+    /**
+     * Gets the first parent that's an instance of any of the given types.
+     *
+     * @param parentTypes Types to look for
+     * @param <T>         Most specific common type of the parameters
+     *
+     * @return The first parent with a matching type. Returns null if there
+     * is no such parent
+     */
+    <T> T getFirstParentOfAnyType(Class<? extends T>... parentTypes);
+
     /**
      * Traverses the children to find all the instances of type childType or
      * one of its subclasses.
@@ -163,7 +196,7 @@ public interface Node {
 
     /**
      * Traverses down the tree to find all the descendant instances of type
-     * descendantType.
+     * descendantType without crossing find boundaries.
      *
      * @param targetType
      *            class which you want to find.
@@ -200,7 +233,7 @@ public interface Node {
 
     /**
      * Traverses down the tree to find the first descendant instance of type
-     * descendantType.
+     * descendantType without crossing find boundaries.
      *
      * @param descendantType
      *            class which you want to find.
@@ -210,7 +243,7 @@ public interface Node {
     <T> T getFirstDescendantOfType(Class<T> descendantType);
 
     /**
-     * Finds if this node contains a descendant of the given type.
+     * Finds if this node contains a descendant of the given type without crossing find boundaries.
      *
      * @param type
      *            the node type to search
@@ -256,12 +289,12 @@ public interface Node {
 
     /**
      * Set the user data associated with this node.
-     * <p>
-     * PMD itself will never set user data onto a node. Nor should any Rule
+     *
+     * <p>PMD itself will never set user data onto a node. Nor should any Rule
      * implementation, as the AST nodes are shared between concurrently
      * executing Rules (i.e. it is <strong>not</strong> thread-safe).
-     * <p>
-     * This API is most useful for external applications looking to leverage
+     *
+     * <p>This API is most useful for external applications looking to leverage
      * PMD's robust support for AST structures, in which case application
      * specific annotations on the AST nodes can be quite useful.
      *
@@ -278,6 +311,7 @@ public interface Node {
     /**
      * This method tells the node to remove the child node at the given index from the node's list of
      * children, if any; if not, no changes are done.
+     *
      * @param childIndex
      *          The index of the child to be removed
      */
@@ -290,4 +324,14 @@ public interface Node {
      * @return The XPath node name
      */
     String getXPathNodeName();
+
+
+    /**
+     * Returns an iterator enumerating all the attributes that are available
+     * from XPath for this node.
+     *
+     * @return An attribute iterator for this node
+     */
+    Iterator<Attribute> getXPathAttributesIterator();
+
 }

@@ -6,6 +6,7 @@ folder: pmd/rules/java
 sidebaractiveurl: /pmd_rules_java.html
 editmepath: ../rulesets/ruledoctest/sample.xml
 keywords: Sample, OverrideBothEqualsAndHashcode, JumbledIncrementer, DeprecatedSample, RenamedRule, MovedRule
+language: Java
 ---
 ## DeprecatedSample
 
@@ -17,6 +18,7 @@ keywords: Sample, OverrideBothEqualsAndHashcode, JumbledIncrementer, DeprecatedS
 
 Just some description of a deprecated rule.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ForStatement
 ```
@@ -34,6 +36,7 @@ Just some description of a deprecated rule.
 
 Avoid jumbled loop incrementers - its usually a mistake, and is confusing even if intentional.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ForStatement
  [
@@ -59,10 +62,11 @@ public class JumbledIncrementerRule1 {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|sampleAdditionalProperty|the value|This is a additional property for tests|
-|sampleDeprecatedProperty|test|<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f; font-size: 75%;">Deprecated</span>  This is a sample deprecated property for tests|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|sampleAdditionalProperty|the value|This is a additional property for tests|no|
+|sampleMultiStringProperty|Value1 \| Value2|Test property with multiple strings|yes. Delimiter is '\|'.|
+|sampleDeprecatedProperty|test|<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f; font-size: 75%;">Deprecated</span>  This is a sample deprecated property for tests|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -81,6 +85,7 @@ The rule has been moved to another ruleset. Use instead: [JumbledIncrementer](pm
 
 Avoid jumbled loop incrementers - its usually a mistake, and is confusing even if intentional.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ForStatement
   [
@@ -171,6 +176,7 @@ This rule has been renamed. Use instead: [JumbledIncrementer](#jumbledincremente
 
 Avoid jumbled loop incrementers - its usually a mistake, and is confusing even if intentional.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ForStatement
  [
@@ -196,10 +202,11 @@ public class JumbledIncrementerRule1 {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|sampleAdditionalProperty|the value|This is a additional property for tests|
-|sampleDeprecatedProperty|test|<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f; font-size: 75%;">Deprecated</span>  This is a sample deprecated property for tests|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|sampleAdditionalProperty|the value|This is a additional property for tests|no|
+|sampleMultiStringProperty|Value1 \| Value2|Test property with multiple strings|yes. Delimiter is '\|'.|
+|sampleDeprecatedProperty|test|<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f; font-size: 75%;">Deprecated</span>  This is a sample deprecated property for tests|no|
 
 **Use this rule by referencing it:**
 ``` xml

@@ -28,6 +28,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +40,7 @@ import net.sourceforge.pmd.RuleSetNotFoundException;
 import net.sourceforge.pmd.lang.Language;
 import net.sourceforge.pmd.lang.rule.RuleReference;
 import net.sourceforge.pmd.lang.rule.XPathRule;
+import net.sourceforge.pmd.properties.MultiValuePropertyDescriptor;
 import net.sourceforge.pmd.properties.PropertyDescriptor;
 
 public class RuleDocGenerator {
@@ -314,7 +316,9 @@ public class RuleDocGenerator {
      */
     private void generateRuleSetIndex(Map<Language, List<RuleSet>> rulesets) throws IOException {
         for (Map.Entry<Language, List<RuleSet>> entry : rulesets.entrySet()) {
-            String languageTersename = entry.getKey().getTerseName();
+            Language language = entry.getKey();
+            String languageTersename = language.getTerseName();
+            String languageName = language.getName();
             for (RuleSet ruleset : entry.getValue()) {
                 String rulesetFilename = RuleSetUtils.getRuleSetFilename(ruleset);
                 String filename = RULESET_INDEX_FILENAME_PATTERN
@@ -336,6 +340,7 @@ public class RuleDocGenerator {
                 lines.add("sidebaractiveurl: /" + LANGUAGE_INDEX_PERMALINK_PATTERN.replace("${language.tersename}", languageTersename));
                 lines.add("editmepath: ../" + getRuleSetSourceFilepath(ruleset));
                 lines.add("keywords: " + getRuleSetKeywords(ruleset));
+                lines.add("language: " + languageName);
                 lines.add("---");
 
                 for (Rule rule : getSortedRules(ruleset)) {
@@ -385,17 +390,17 @@ public class RuleDocGenerator {
                     lines.add("");
 
                     if (rule instanceof XPathRule || rule instanceof RuleReference && ((RuleReference) rule).getRule() instanceof XPathRule) {
+                        lines.add("**This rule is defined by the following XPath expression:**");
                         lines.add("```");
                         lines.addAll(toLines(StringUtils.stripToEmpty(rule.getProperty(XPathRule.XPATH_DESCRIPTOR))));
                         lines.add("```");
-                        lines.add("");
                     } else {
                         lines.add("**This rule is defined by the following Java class:** "
                                 + "[" + rule.getRuleClass() + "]("
                                 + GITHUB_SOURCE_LINK + getRuleClassSourceFilepath(rule.getRuleClass())
                                 + ")");
-                        lines.add("");
                     }
+                    lines.add("");
 
                     if (!rule.getExamples().isEmpty()) {
                         lines.add("**Example(s):**");
@@ -418,17 +423,44 @@ public class RuleDocGenerator {
                     if (!properties.isEmpty()) {
                         lines.add("**This rule has the following properties:**");
                         lines.add("");
-                        lines.add("|Name|Default Value|Description|");
-                        lines.add("|----|-------------|-----------|");
+                        lines.add("|Name|Default Value|Description|Multivalued|");
+                        lines.add("|----|-------------|-----------|-----------|");
                         for (PropertyDescriptor<?> propertyDescriptor : properties) {
                             String description = propertyDescriptor.description();
                             if (description != null && description.toLowerCase(Locale.ROOT).startsWith(DEPRECATED_RULE_PROPERTY_MARKER)) {
                                 description = DEPRECATION_LABEL_SMALL
                                         + description.substring(DEPRECATED_RULE_PROPERTY_MARKER.length());
                             }
+
+                            String defaultValue = "";
+                            if (propertyDescriptor.defaultValue() != null) {
+                                if (propertyDescriptor.isMultiValue()) {
+                                    @SuppressWarnings("unchecked") // multi valued properties are using a List
+                                    MultiValuePropertyDescriptor<List<?>> multiPropertyDescriptor = (MultiValuePropertyDescriptor<List<?>>) propertyDescriptor;
+                                    defaultValue = multiPropertyDescriptor.asDelimitedString(multiPropertyDescriptor.defaultValue());
+
+                                    // surround the delimiter with spaces, so that the browser can wrap
+                                    // the value nicely
+                                    defaultValue = defaultValue.replaceAll(Pattern.quote(
+                                            String.valueOf(multiPropertyDescriptor.multiValueDelimiter())),
+                                            " " + multiPropertyDescriptor.multiValueDelimiter() + " ");
+                                } else {
+                                    defaultValue = String.valueOf(propertyDescriptor.defaultValue());
+                                }
+                            }
+
+                            String multiValued = "no";
+                            if (propertyDescriptor.isMultiValue()) {
+                                MultiValuePropertyDescriptor<?> multiValuePropertyDescriptor =
+                                        (MultiValuePropertyDescriptor<?>) propertyDescriptor;
+                                multiValued = "yes. Delimiter is '"
+                                        + multiValuePropertyDescriptor.multiValueDelimiter() + "'.";
+                            }
+
                             lines.add("|" + propertyDescriptor.name()
-                                + "|" + (propertyDescriptor.defaultValue() != null ? String.valueOf(propertyDescriptor.defaultValue()) : "")
+                                + "|" + defaultValue.replace("|", "\\|")
                                 + "|" + description
+                                + "|" + multiValued.replace("|", "\\|")
                                 + "|");
                         }
                         lines.add("");

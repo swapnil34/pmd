@@ -6,6 +6,7 @@ folder: pmd/rules/jsp
 sidebaractiveurl: /pmd_rules_jsp.html
 editmepath: ../pmd-jsp/src/main/resources/category/jsp/design.xml
 keywords: Design, NoInlineScript, NoInlineStyleInformation, NoLongScripts, NoScriptlets
+language: Java Server Pages
 ---
 ## NoInlineScript
 
@@ -16,6 +17,7 @@ keywords: Design, NoInlineScript, NoInlineStyleInformation, NoLongScripts, NoScr
 Avoid inlining HTML script content.  Consider externalizing the HTML script using the 'src' attribute on the "script" element.
 Externalized script could be reused between pages.  Browsers can also cache the script, reducing overall download bandwidth.
 
+**This rule is defined by the following XPath expression:**
 ```
 //HtmlScript[@Image != '']
 ```
@@ -55,6 +57,7 @@ tags, or attributes like "align='center'".
 
 Scripts should be part of Tag Libraries, rather than part of JSP pages.
 
+**This rule is defined by the following XPath expression:**
 ```
 //HtmlScript[(@EndLine - @BeginLine > 10)]
 ```
@@ -98,6 +101,7 @@ onload=calcDays;
 
 Scriptlets should be factored into Tag Libraries or JSP declarations, rather than being part of JSP pages.
 
+**This rule is defined by the following XPath expression:**
 ```
 //JspScriptlet
 |

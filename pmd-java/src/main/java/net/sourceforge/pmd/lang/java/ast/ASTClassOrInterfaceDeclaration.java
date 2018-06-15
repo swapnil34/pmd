@@ -5,18 +5,34 @@
 
 package net.sourceforge.pmd.lang.java.ast;
 
+import java.util.Collections;
 import java.util.List;
 
 import net.sourceforge.pmd.lang.ast.Node;
+import net.sourceforge.pmd.util.CollectionUtil;
 
 
-public class ASTClassOrInterfaceDeclaration extends AbstractJavaAccessTypeNode implements ASTAnyTypeDeclaration {
+/**
+ * Represents class and interface declarations.
+ *
+ * <pre>
+ *
+ * ClassOrInterfaceDeclaration ::=
+ *          ( "class" | "interface" )
+ *          &lt;IDENTIFIER>
+ *          [ TypeParameters ]
+ *          [ ExtendsList ]
+ *          [ ImplementsList ]
+ *          ClassOrInterfaceBody
+ * </pre>
+ *
+ */
+public class ASTClassOrInterfaceDeclaration extends AbstractAnyTypeDeclaration {
 
     private boolean isLocal;
     private boolean isLocalComputed; // guard for lazy evaluation of isLocal()
 
     private boolean isInterface;
-    private JavaQualifiedName qualifiedName;
 
     public ASTClassOrInterfaceDeclaration(int id) {
         super(id);
@@ -28,7 +44,7 @@ public class ASTClassOrInterfaceDeclaration extends AbstractJavaAccessTypeNode i
 
     @Override
     public boolean isFindBoundary() {
-        return isNested();
+        return isNested() || isLocal();
     }
 
     /**
@@ -37,11 +53,6 @@ public class ASTClassOrInterfaceDeclaration extends AbstractJavaAccessTypeNode i
     @Override
     public Object jjtAccept(JavaParserVisitor visitor, Object data) {
         return visitor.visit(this, data);
-    }
-
-    public boolean isNested() {
-        return jjtGetParent() instanceof ASTClassOrInterfaceBodyDeclaration
-            || jjtGetParent() instanceof ASTAnnotationTypeMemberDeclaration;
     }
 
 
@@ -80,25 +91,6 @@ public class ASTClassOrInterfaceDeclaration extends AbstractJavaAccessTypeNode i
     }
 
     @Override
-    public JavaQualifiedName getQualifiedName() {
-        if (qualifiedName == null) {
-            if (isNested() || isLocal()) {
-                ASTAnyTypeDeclaration parent = this.getFirstParentOfType(ASTAnyTypeDeclaration.class);
-                JavaQualifiedName parentQN = parent.getQualifiedName();
-
-                qualifiedName = isLocal()
-                        ? JavaQualifiedName.ofLocalClass(parentQN, this.getImage())
-                        : JavaQualifiedName.ofNestedClass(parentQN, this.getImage());
-                return qualifiedName;
-            }
-
-            qualifiedName = JavaQualifiedName.ofOuterClass(this);
-        }
-
-        return qualifiedName;
-    }
-
-    @Override
     public TypeKind getTypeKind() {
         return isInterface() ? TypeKind.INTERFACE : TypeKind.CLASS;
     }
@@ -109,4 +101,37 @@ public class ASTClassOrInterfaceDeclaration extends AbstractJavaAccessTypeNode i
         return getFirstChildOfType(ASTClassOrInterfaceBody.class)
             .findChildrenOfType(ASTAnyTypeBodyDeclaration.class);
     }
+
+
+    /**
+     * Returns the superclass type node if this node is a class
+     * declaration and explicitly declares an {@code extends}
+     * clause. Superinterfaces of an interface are not considered.
+     *
+     * <p>Returns {@code null} otherwise.
+     */
+    public ASTClassOrInterfaceType getSuperClassTypeNode() {
+        if (isInterface()) {
+            return null;
+        }
+
+        ASTExtendsList extendsList = getFirstChildOfType(ASTExtendsList.class);
+        return extendsList == null ? null : extendsList.iterator().next();
+    }
+
+
+    /**
+     * Returns the interfaces implemented by this class, or
+     * extended by this interface. Returns an empty list if
+     * none is specified.
+     */
+    public List<ASTClassOrInterfaceType> getSuperInterfacesTypeNodes() {
+
+        Iterable<ASTClassOrInterfaceType> it = isInterface()
+                ? getFirstChildOfType(ASTExtendsList.class)
+                : getFirstChildOfType(ASTImplementsList.class);
+
+        return it == null ? Collections.<ASTClassOrInterfaceType>emptyList() : CollectionUtil.toList(it.iterator());
+    }
+
 }

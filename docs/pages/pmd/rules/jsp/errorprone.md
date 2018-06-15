@@ -6,6 +6,7 @@ folder: pmd/rules/jsp
 sidebaractiveurl: /pmd_rules_jsp.html
 editmepath: ../pmd-jsp/src/main/resources/category/jsp/errorprone.xml
 keywords: Error Prone, JspEncoding
+language: Java Server Pages
 ---
 ## JspEncoding
 
@@ -15,6 +16,7 @@ keywords: Error Prone, JspEncoding
 
 A missing 'meta' tag or page directive will trigger this rule, as well as a non-UTF-8 charset.
 
+**This rule is defined by the following XPath expression:**
 ```
 //CompilationUnit/Content[
 not(Element[@Name="meta"][

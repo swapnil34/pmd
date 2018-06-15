@@ -6,6 +6,7 @@ folder: pmd/rules/java
 sidebaractiveurl: /pmd_rules_java.html
 editmepath: ../pmd-java/src/main/resources/category/java/design.xml
 keywords: Design, AbstractClassWithoutAnyMethod, AvoidCatchingGenericException, AvoidDeeplyNestedIfStmts, AvoidRethrowingException, AvoidThrowingNewInstanceOfSameException, AvoidThrowingNullPointerException, AvoidThrowingRawExceptionTypes, ClassWithOnlyPrivateConstructorsShouldBeFinal, CollapsibleIfStatements, CouplingBetweenObjects, CyclomaticComplexity, DataClass, DoNotExtendJavaLangError, ExceptionAsFlowControl, ExcessiveClassLength, ExcessiveImports, ExcessiveMethodLength, ExcessiveParameterList, ExcessivePublicCount, FinalFieldCouldBeStatic, GodClass, ImmutableField, LawOfDemeter, LogicInversion, LoosePackageCoupling, ModifiedCyclomaticComplexity, NcssConstructorCount, NcssCount, NcssMethodCount, NcssTypeCount, NPathComplexity, SignatureDeclareThrowsException, SimplifiedTernary, SimplifyBooleanAssertion, SimplifyBooleanExpressions, SimplifyBooleanReturns, SimplifyConditional, SingularField, StdCyclomaticComplexity, SwitchDensity, TooManyFields, TooManyMethods, UselessOverridingMethod, UseObjectForClearerAPI, UseUtilityClass
+language: Java
 ---
 ## AbstractClassWithoutAnyMethod
 
@@ -17,11 +18,12 @@ If an abstract class does not provides any methods, it may be acting as a simple
 that is not meant to be instantiated. In this case, it is probably better to use a private or
 protected constructor in order to prevent instantiation than make the class misleadingly abstract.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration
     [@Abstract = 'true']
     [count(//MethodDeclaration) + count(//ConstructorDeclaration) = 0]
-    [not(../Annotation/MarkerAnnotation/Name[typeof(@Image, 'com.google.auto.value.AutoValue', 'AutoValue')])]
+    [not(../Annotation/MarkerAnnotation/Name[typeIs('com.google.auto.value.AutoValue')])]
 ```
 
 **Example(s):**
@@ -46,6 +48,7 @@ public abstract class Example {
 
 Avoid catching generic exceptions such as NullPointerException, RuntimeException, Exception in try-catch block
 
+**This rule is defined by the following XPath expression:**
 ```
 //CatchStatement/FormalParameter/Type/ReferenceType/ClassOrInterfaceType[
     @Image='NullPointerException' or
@@ -107,9 +110,9 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|problemDepth|3|The if statement depth reporting threshold|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|problemDepth|3|The if statement depth reporting threshold|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -124,6 +127,7 @@ public class Foo {
 
 Catch blocks that merely rethrow a caught exception only add to code size and runtime complexity.
 
+**This rule is defined by the following XPath expression:**
 ```
 //CatchStatement[FormalParameter
  /VariableDeclaratorId/@Image = Block/BlockStatement/Statement
@@ -157,6 +161,7 @@ public void bar() {
 Catch blocks that merely rethrow a caught exception wrapped inside a new instance of the same type only add to
 code size and runtime complexity.
 
+**This rule is defined by the following XPath expression:**
 ```
 //CatchStatement[
   count(Block/BlockStatement/Statement) = 1
@@ -193,10 +198,35 @@ public void bar() {
 
 **Priority:** High (1)
 
-Avoid throwing NullPointerExceptions. These are confusing because most people will assume that the
-virtual machine threw it. Consider using an IllegalArgumentException instead; this will be
-clearly seen as a programmer-initiated exception.
+Avoid throwing NullPointerExceptions manually. These are confusing because most people will assume that the
+virtual machine threw it.  To avoid a method being called with a null parameter, you may consider 
+using an IllegalArgumentException instead, making it clearly seen as a programmer-initiated exception. 
+However, there are better ways to handle this:
 
+>*Effective Java, 3rd Edition, Item 72: Favor the use of standard exceptions*
+>
+>Arguably, every erroneous method invocation boils down to an illegal argument or state, 
+but other exceptions are standardly used for certain kinds of illegal arguments and states. 
+If a caller passes null in some parameter for which null values are prohibited, convention dictates that 
+NullPointerException be thrown rather than IllegalArgumentException.
+
+To implement that, you are encouraged to use `java.util.Objects.requireNonNull()`
+(introduced in Java 1.7). This method is designed primarily for doing parameter
+validation in methods and constructors with multiple parameters.
+
+Your parameter validation could thus look like the following:
+```
+public class Foo {
+    private String exampleValue;
+      
+    void setExampleValue(String exampleValue) {
+      // check, throw and assignment in a single standard call
+      this.exampleValue = Objects.requireNonNull(exampleValue, "exampleValue must not be null!");
+    }
+  }
+```
+
+**This rule is defined by the following XPath expression:**
 ```
 //AllocationExpression/ClassOrInterfaceType[@Image='NullPointerException']
 ```
@@ -225,16 +255,17 @@ public class Foo {
 Avoid throwing certain exception types. Rather than throw a raw RuntimeException, Throwable,
 Exception, or Error, use a subclassed exception or error instead.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ThrowStatement//AllocationExpression
  /ClassOrInterfaceType[
- (@Image='Throwable' and count(//ImportDeclaration/Name[ends-with(@Image,'Throwable')]) = 0)
+ typeIsExactly('java.lang.Throwable')
 or
- (@Image='Exception' and count(//ImportDeclaration/Name[ends-with(@Image,'Exception')]) = 0)
+ typeIsExactly('java.lang.Exception')
 or
- (@Image='Error'  and count(//ImportDeclaration/Name[ends-with(@Image,'Error')]) = 0)
+ typeIsExactly('java.lang.Error')
 or
-( @Image='RuntimeException'  and count(//ImportDeclaration/Name[ends-with(@Image,'RuntimeException')]) = 0)
+ typeIsExactly('java.lang.RuntimeException')
 ]
 ```
 
@@ -262,6 +293,7 @@ public class Foo {
 A class with only private constructors should be final, unless the private constructor
 is invoked by a inner class.
 
+**This rule is defined by the following XPath expression:**
 ```
 TypeDeclaration[count(../TypeDeclaration) = 1]/ClassOrInterfaceDeclaration
 [@Final = 'false']
@@ -291,6 +323,7 @@ public class Foo {  //Should be final
 
 Sometimes two consecutive 'if' statements can be consolidated by separating their conditions with a boolean short-circuit operator.
 
+**This rule is defined by the following XPath expression:**
 ```
 //IfStatement[@Else='false']/Statement
  /IfStatement[@Else='false']
@@ -357,9 +390,9 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|threshold|20|Unique type reporting threshold|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|threshold|20|Unique type reporting threshold|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -421,12 +454,12 @@ class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|cycloOptions|[]|Choose options for the computation of Cyclo|
-|classReportLevel|80|Total class complexity reporting threshold|
-|methodReportLevel|10|Cyclomatic complexity reporting threshold|
-|reportLevel|10|<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f; font-size: 75%;">Deprecated</span>  Cyclomatic Complexity reporting threshold|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|cycloOptions||Choose options for the computation of Cyclo|yes. Delimiter is '\|'.|
+|classReportLevel|80|Total class complexity reporting threshold|no|
+|methodReportLevel|10|Cyclomatic complexity reporting threshold|no|
+|reportLevel|10|<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f; font-size: 75%;">Deprecated</span>  Cyclomatic Complexity reporting threshold|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -482,9 +515,10 @@ public class DataClass {
 
 Errors are system exceptions. Do not extend them.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration/ExtendsList/ClassOrInterfaceType
-  [@Image="Error" or @Image="java.lang.Error"]
+  [typeIs('java.lang.Error')]
 ```
 
 **Example(s):**
@@ -564,11 +598,11 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -600,11 +634,11 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -636,11 +670,11 @@ public void doSomething() {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -676,11 +710,11 @@ public void addPerson(      // preferred approach
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -718,11 +752,11 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -738,6 +772,7 @@ public class Foo {
 If a final field is assigned to a compile-time constant, it could be made static, thus saving overhead
 in each object at runtime.
 
+**This rule is defined by the following XPath expression:**
 ```
 //FieldDeclaration
  [@Final='true' and @Static='false']
@@ -807,6 +842,12 @@ public class Foo {
 }
 ```
 
+**This rule has the following properties:**
+
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|ignoredAnnotations|lombok.Setter \| lombok.Getter \| lombok.Builder \| lombok.Data \| lombok.RequiredArgsConstructor \| lombok.AllArgsConstructor \| lombok.Value \| lombok.NoArgsConstructor|Fully qualified names of the annotation types that should be ignored by this rule|yes. Delimiter is '\|'.|
+
 **Use this rule by referencing it:**
 ``` xml
 <rule ref="category/java/design.xml/ImmutableField" />
@@ -869,6 +910,7 @@ public class Foo {
 
 Use opposite operator instead of negating the whole expression with a logic complement operator.
 
+**This rule is defined by the following XPath expression:**
 ```
 //UnaryExpressionNotPlusMinus[@Image='!']/PrimaryExpression/PrimaryPrefix/Expression[EqualityExpression or RelationalExpression]
 ```
@@ -920,10 +962,10 @@ public class Bar {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|classes|[]|Allowed classes|
-|packages|[]|Restricted packages|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|classes||Allowed classes|yes. Delimiter is ','.|
+|packages||Restricted packages|yes. Delimiter is ','.|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -989,11 +1031,11 @@ public class Foo {    // This has a Cyclomatic Complexity = 9
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|showMethodsComplexity|true|Add method average violations to the report|
-|showClassesComplexity|true|Add class average violations to the report|
-|reportLevel|10|Cyclomatic Complexity reporting threshold|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|showMethodsComplexity|true|Add method average violations to the report|no|
+|showClassesComplexity|true|Add class average violations to the report|no|
+|reportLevel|10|Cyclomatic Complexity reporting threshold|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1033,11 +1075,11 @@ public class Foo extends Bar {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1089,11 +1131,11 @@ class Foo {                         // +1, total Ncss = 12
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|ncssOptions|[]|Choose options for the calculation of Ncss|
-|methodReportLevel|12|Metric reporting threshold for methods|
-|classReportLevel|250|Metric reporting threshold for classes|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|ncssOptions||Choose options for the calculation of Ncss|yes. Delimiter is '\|'.|
+|methodReportLevel|12|Metric reporting threshold for methods|no|
+|classReportLevel|250|Metric reporting threshold for classes|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1134,11 +1176,11 @@ public class Foo extends Bar {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1178,11 +1220,11 @@ public class Foo extends Bar {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1247,10 +1289,10 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|minimum|200.0|<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f; font-size: 75%;">Deprecated</span>  Minimum reporting threshold|
-|reportLevel|200|N-Path Complexity reporting threshold|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|minimum|200.0|<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f; font-size: 75%;">Deprecated</span>  Minimum reporting threshold|no|
+|reportLevel|200|N-Path Complexity reporting threshold|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1279,9 +1321,9 @@ public void foo() throws Exception {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|IgnoreJUnitCompletely|false|Allow all methods in a JUnit testcase to throw Exceptions|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|IgnoreJUnitCompletely|false|Allow all methods in a JUnit testcase to throw Exceptions|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1304,6 +1346,7 @@ or
 `!condition || foo` when the literalBoolean is true
 `condition && foo`  when the literalBoolean is false
 
+**This rule is defined by the following XPath expression:**
 ```
 //ConditionalExpression[@Ternary='true'][not(PrimaryExpression/*/Literal) and (Expression/PrimaryExpression/*/Literal/BooleanLiteral)]
 |
@@ -1353,6 +1396,7 @@ as:
 
     assertFalse(expr);
 
+**This rule is defined by the following XPath expression:**
 ```
 //StatementExpression
 [
@@ -1362,7 +1406,7 @@ PrimaryExpression/PrimarySuffix/Arguments/ArgumentList
  /Expression/UnaryExpressionNotPlusMinus[@Image='!']
 /PrimaryExpression/PrimaryPrefix
 ]
-[ancestor::ClassOrInterfaceDeclaration[//ClassOrInterfaceType[pmd-java:typeof(@Image, 'junit.framework.TestCase','TestCase')] or //MarkerAnnotation/Name[pmd-java:typeof(@Image, 'org.junit.Test', 'Test')]]]
+[ancestor::ClassOrInterfaceDeclaration[//ClassOrInterfaceType[pmd-java:typeIs('junit.framework.TestCase')] or //MarkerAnnotation/Name[pmd-java:typeIs('org.junit.Test')]]]
 ```
 
 **Example(s):**
@@ -1389,6 +1433,7 @@ public class SimpleTest extends TestCase {
 
 Avoid unnecessary comparisons in boolean expressions, they serve no purpose and impacts readability.
 
+**This rule is defined by the following XPath expression:**
 ```
 //EqualityExpression/PrimaryExpression
  /PrimaryPrefix/Literal/BooleanLiteral
@@ -1451,6 +1496,7 @@ public boolean isBarEqualTo(int x) {
 
 No need to check for null before an instanceof; the instanceof keyword returns false when given a null argument.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Expression
  [ConditionalOrExpression
@@ -1521,10 +1567,11 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|disallowNotAssignment|false|Disallow violations where the first usage is not an assignment|
-|checkInnerClasses|false|Check inner classes|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|disallowNotAssignment|false|Disallow violations where the first usage is not an assignment|no|
+|checkInnerClasses|false|Check inner classes|no|
+|ignoredAnnotations|lombok.Setter \| lombok.Getter \| lombok.Builder \| lombok.Data \| lombok.RequiredArgsConstructor \| lombok.AllArgsConstructor \| lombok.Value \| lombok.NoArgsConstructor|Fully qualified names of the annotation types that should be ignored by this rule|yes. Delimiter is '\|'.|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1589,11 +1636,11 @@ public class Foo {    // This has a Cyclomatic Complexity = 12
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|showMethodsComplexity|true|Add method average violations to the report|
-|showClassesComplexity|true|Add class average violations to the report|
-|reportLevel|10|Cyclomatic Complexity reporting threshold|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|showMethodsComplexity|true|Add method average violations to the report|no|
+|showClassesComplexity|true|Add class average violations to the report|no|
+|reportLevel|10|Cyclomatic Complexity reporting threshold|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1632,11 +1679,11 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1674,9 +1721,9 @@ public class Person {   // this is more manageable
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|maxfields|15|Max allowable fields|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|maxfields|15|Max allowable fields|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1692,6 +1739,7 @@ public class Person {   // this is more manageable
 A class with too many methods is probably a good suspect for refactoring, in order to reduce its
 complexity and find a way to have more fine grained objects.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration/ClassOrInterfaceBody
      [
@@ -1709,9 +1757,9 @@ complexity and find a way to have more fine grained objects.
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|maxmethods|10|The method count reporting threshold|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|maxmethods|10|The method count reporting threshold|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1747,9 +1795,9 @@ public Long getId() {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|ignoreAnnotations|false|Ignore annotations|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|ignoreAnnotations|false|Ignore annotations|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1769,6 +1817,7 @@ API (such as doWork(Workload workload), rather than a tedious series of Strings)
 point to pass extra data, you'll be able to do so by simply modifying or extending Workload without any modification to
 your API.
 
+**This rule is defined by the following XPath expression:**
 ```
 //MethodDeclaration[@Public]/MethodDeclarator/FormalParameters[
      count(FormalParameter/Type/ReferenceType/ClassOrInterfaceType[@Image = 'String']) > 3

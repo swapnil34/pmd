@@ -6,6 +6,7 @@ folder: pmd/rules/plsql
 sidebaractiveurl: /pmd_rules_plsql.html
 editmepath: ../pmd-plsql/src/main/resources/category/plsql/design.xml
 keywords: Design, CyclomaticComplexity, ExcessiveMethodLength, ExcessiveObjectLength, ExcessivePackageBodyLength, ExcessivePackageSpecificationLength, ExcessiveParameterList, ExcessiveTypeLength, NcssMethodCount, NcssObjectCount, NPathComplexity, TooManyFields, TooManyMethods
+language: PLSQL
 ---
 ## CyclomaticComplexity
 
@@ -141,11 +142,11 @@ END;
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|showMethodsComplexity|true|Add method average violations to the report|
-|showClassesComplexity|true|Add class average violations to the report|
-|reportLevel|10|Cyclomatic Complexity reporting threshold|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|showMethodsComplexity|true|Add method average violations to the report|no|
+|showClassesComplexity|true|Add class average violations to the report|no|
+|reportLevel|10|Cyclomatic Complexity reporting threshold|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -178,11 +179,11 @@ END;
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -225,11 +226,11 @@ END;
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -272,11 +273,11 @@ END;
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -312,11 +313,11 @@ END;
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -354,11 +355,11 @@ END;
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -401,11 +402,11 @@ END;
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -437,11 +438,11 @@ END;
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -475,11 +476,11 @@ CREATE OR REPLACE PACKAGE pkg_
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -537,11 +538,11 @@ END;
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -573,9 +574,9 @@ END pkg_too_many_fields;
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|maxfields|15|Max allowable fields|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|maxfields|15|Max allowable fields|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -591,6 +592,7 @@ END pkg_too_many_fields;
 A package or type with too many methods is probably a good suspect for refactoring, in order to reduce its complexity and find a way to
 have more fine grained objects.
 
+**This rule is defined by the following XPath expression:**
 ```
 //node()
      [ (
@@ -627,9 +629,9 @@ have more fine grained objects.
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|maxmethods|1|The method count reporting threshold|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|maxmethods|1|The method count reporting threshold|no|
 
 **Use this rule by referencing it:**
 ``` xml

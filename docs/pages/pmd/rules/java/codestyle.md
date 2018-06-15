@@ -5,9 +5,12 @@ permalink: pmd_rules_java_codestyle.html
 folder: pmd/rules/java
 sidebaractiveurl: /pmd_rules_java.html
 editmepath: ../pmd-java/src/main/resources/category/java/codestyle.xml
-keywords: Code Style, AbstractNaming, AtLeastOneConstructor, AvoidDollarSigns, AvoidFinalLocalVariable, AvoidPrefixingMethodParameters, AvoidProtectedFieldInFinalClass, AvoidProtectedMethodInFinalClassNotExtending, AvoidUsingNativeCode, BooleanGetMethodName, CallSuperInConstructor, ClassNamingConventions, CommentDefaultAccessModifier, ConfusingTernary, DefaultPackage, DontImportJavaLang, DuplicateImports, EmptyMethodInAbstractClassShouldBeAbstract, ExtendsObject, FieldDeclarationsShouldBeAtStartOfClass, ForLoopShouldBeWhileLoop, ForLoopsMustUseBraces, GenericsNaming, IfElseStmtsMustUseBraces, IfStmtsMustUseBraces, LocalHomeNamingConvention, LocalInterfaceSessionNamingConvention, LocalVariableCouldBeFinal, LongVariable, MDBAndSessionBeanNamingConvention, MethodArgumentCouldBeFinal, MethodNamingConventions, MIsLeadingVariableName, NoPackage, OnlyOneReturn, PackageCase, PrematureDeclaration, RemoteInterfaceNamingConvention, RemoteSessionInterfaceNamingConvention, ShortClassName, ShortMethodName, ShortVariable, SuspiciousConstantFieldName, TooManyStaticImports, UnnecessaryConstructor, UnnecessaryFullyQualifiedName, UnnecessaryLocalBeforeReturn, UnnecessaryModifier, UnnecessaryReturn, UselessParentheses, UselessQualifiedThis, VariableNamingConventions, WhileLoopsMustUseBraces
+keywords: Code Style, AbstractNaming, AtLeastOneConstructor, AvoidDollarSigns, AvoidFinalLocalVariable, AvoidPrefixingMethodParameters, AvoidProtectedFieldInFinalClass, AvoidProtectedMethodInFinalClassNotExtending, AvoidUsingNativeCode, BooleanGetMethodName, CallSuperInConstructor, ClassNamingConventions, CommentDefaultAccessModifier, ConfusingTernary, ControlStatementBraces, DefaultPackage, DontImportJavaLang, DuplicateImports, EmptyMethodInAbstractClassShouldBeAbstract, ExtendsObject, FieldDeclarationsShouldBeAtStartOfClass, ForLoopShouldBeWhileLoop, ForLoopsMustUseBraces, GenericsNaming, IdenticalCatchBranches, IfElseStmtsMustUseBraces, IfStmtsMustUseBraces, LocalHomeNamingConvention, LocalInterfaceSessionNamingConvention, LocalVariableCouldBeFinal, LongVariable, MDBAndSessionBeanNamingConvention, MethodArgumentCouldBeFinal, MethodNamingConventions, MIsLeadingVariableName, NoPackage, OnlyOneReturn, PackageCase, PrematureDeclaration, RemoteInterfaceNamingConvention, RemoteSessionInterfaceNamingConvention, ShortClassName, ShortMethodName, ShortVariable, SuspiciousConstantFieldName, TooManyStaticImports, UnnecessaryAnnotationValueElement, UnnecessaryConstructor, UnnecessaryFullyQualifiedName, UnnecessaryLocalBeforeReturn, UnnecessaryModifier, UnnecessaryReturn, UselessParentheses, UselessQualifiedThis, VariableNamingConventions, WhileLoopsMustUseBraces
+language: Java
 ---
 ## AbstractNaming
+
+<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f;">Deprecated</span> 
 
 **Since:** PMD 1.4
 
@@ -15,6 +18,7 @@ keywords: Code Style, AbstractNaming, AtLeastOneConstructor, AvoidDollarSigns, A
 
 Abstract classes should be named 'AbstractXXX'.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration
  [@Abstract='true' and @Interface='false']
@@ -35,9 +39,9 @@ public abstract class Foo { // should be AbstractFoo
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|strict|true|Also flag classes, that are named Abstract, but are not abstract.|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|strict|true|Also flag classes, that are named Abstract, but are not abstract.|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -52,6 +56,7 @@ public abstract class Foo { // should be AbstractFoo
 
 Each class should declare at least one constructor.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration[
   not(ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/ConstructorDeclaration)
@@ -108,6 +113,7 @@ public class Fo$o {  // not a recommended name
 
 Avoid using final local variables, turn them into fields.
 
+**This rule is defined by the following XPath expression:**
 ```
 //LocalVariableDeclaration[
   @Final = 'true'
@@ -146,6 +152,7 @@ Prefixing parameters by 'in' or 'out' pollutes the name of the parameters and re
 To indicate whether or not a parameter will be modify in a method, its better to document method
 behavior with Javadoc.
 
+**This rule is defined by the following XPath expression:**
 ```
 //MethodDeclaration/MethodDeclarator/FormalParameters/FormalParameter/VariableDeclaratorId[
         pmd:matches(@Image,'^in[A-Z].*','^out[A-Z].*','^in$','^out$')
@@ -195,6 +202,7 @@ public class Foo {
 Do not use protected fields in final classes since they cannot be subclassed.
 Clarify your intent by using private or package access modifiers instead.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration[@Final='true']
 /ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration
@@ -226,6 +234,7 @@ Do not use protected methods in most final classes since they cannot be subclass
 only be allowed in final classes that extend other classes with protected methods (whose
 visibility cannot be reduced). Clarify your intent by using private or package access modifiers instead.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration[@Final='true' and not(ExtendsList)]
 /ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration
@@ -255,6 +264,7 @@ public final class Foo {
 Unnecessary reliance on Java Native Interface (JNI) calls directly reduces application portability
 and increases the maintenance burden.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Name[starts-with(@Image,'System.loadLibrary')]
 ```
@@ -293,6 +303,7 @@ Methods that return boolean results should be named as predicate statements to d
 I.e, 'isReady()', 'hasValues()', 'canCommit()', 'willFail()', etc.   Avoid the use of the 'get'
 prefix for these methods.
 
+**This rule is defined by the following XPath expression:**
 ```
 //MethodDeclaration[
 MethodDeclarator[count(FormalParameters/FormalParameter) = 0 or $checkParameterizedMethods = 'true']
@@ -313,9 +324,9 @@ public boolean getFoo(boolean bar); // ok, unless checkParameterizedMethods=true
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|checkParameterizedMethods|false|Check parameterized methods|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|checkParameterizedMethods|false|Check parameterized methods|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -331,6 +342,7 @@ public boolean getFoo(boolean bar); // ok, unless checkParameterizedMethods=true
 It is a good practice to call super() in a constructor. If super() is not called but
 another constructor (such as an overloaded constructor) is called, this rule will not report it.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration[ count (ExtendsList/*) > 0 ]
 /ClassOrInterfaceBody
@@ -365,15 +377,43 @@ public class Foo extends Bar{
 
 **Priority:** High (1)
 
-Class names should always begin with an upper case character.
+Configurable naming conventions for type declarations. This rule reports
+type declarations which do not match the regex that applies to their
+specific kind (e.g. enum or interface). Each regex can be configured through
+properties.
+
+By default this rule uses the standard Java naming convention (Pascal case),
+and reports utility class names not ending with 'Util'.
 
 **This rule is defined by the following Java class:** [net.sourceforge.pmd.lang.java.rule.codestyle.ClassNamingConventionsRule](https://github.com/pmd/pmd/blob/master/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/codestyle/ClassNamingConventionsRule.java)
 
 **Example(s):**
 
 ``` java
-public class Foo {}
+// This is Pascal case, the recommended naming convention in Java
+// Note that the default values of this rule don't allow underscores 
+// or accented characters in type names
+public class FooBar {}
+
+// You may want abstract classes to be named 'AbstractXXX',
+// in which case you can customize the regex for abstract
+// classes to 'Abstract[A-Z]\w+'
+public abstract class Thing {}
+
+// This class doesn't respect the convention, and will be flagged
+public class Éléphant {}
 ```
+
+**This rule has the following properties:**
+
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|classPattern|[A-Z][a-zA-Z0-9]+|Regex which applies to concrete class names|no|
+|abstractClassPattern|[A-Z][a-zA-Z0-9]+|Regex which applies to abstract class names|no|
+|interfacePattern|[A-Z][a-zA-Z0-9]+|Regex which applies to interface names|no|
+|enumPattern|[A-Z][a-zA-Z0-9]+|Regex which applies to enum names|no|
+|annotationPattern|[A-Z][a-zA-Z0-9]+|Regex which applies to annotation names|no|
+|utilityClassPattern|[A-Z][a-zA-Z0-9]+(Utils?\|Helper)|Regex which applies to utility class names|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -388,7 +428,7 @@ public class Foo {}
 
 To avoid mistakes if we want that a Method, Constructor, Field or Nested class have a default access modifier
 we must add a comment at the beginning of it's declaration.
-By default the comment must be /* default */, if you want another, you have to provide a regexp.
+By default the comment must be /* default */ or /* package */, if you want another, you have to provide a regular expression.
 
 **This rule is defined by the following Java class:** [net.sourceforge.pmd.lang.java.rule.codestyle.CommentDefaultAccessModifierRule](https://github.com/pmd/pmd/blob/master/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/codestyle/CommentDefaultAccessModifierRule.java)
 
@@ -419,9 +459,9 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|regex||Regular expression|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|regex|\/\*\s+(default\|package)\s+\*\/|Regular expression|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -453,13 +493,80 @@ boolean bar(int x, int y) {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|ignoreElseIf|false|Ignore conditions with an else-if case|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|ignoreElseIf|false|Ignore conditions with an else-if case|no|
 
 **Use this rule by referencing it:**
 ``` xml
 <rule ref="category/java/codestyle.xml/ConfusingTernary" />
+```
+
+## ControlStatementBraces
+
+**Since:** PMD 6.2.0
+
+**Priority:** Medium (3)
+
+Enforce a policy for braces on control statements. It is recommended to use braces on 'if ... else'
+statements and loop statements, even if they are optional. This usually makes the code clearer, and
+helps prepare the future when you need to add another statement. That said, this rule lets you control
+which statements are required to have braces via properties.
+
+From 6.2.0 on, this rule supersedes WhileLoopMustUseBraces, ForLoopMustUseBraces, IfStmtMustUseBraces,
+and IfElseStmtMustUseBraces.
+
+**This rule is defined by the following XPath expression:**
+```
+//WhileStatement[$checkWhileStmt and not(Statement/Block) and not($allowEmptyLoop and Statement/EmptyStatement)]
+                |
+                //ForStatement[$checkForStmt and not(Statement/Block) and not($allowEmptyLoop and Statement/EmptyStatement)]
+                |
+                //DoStatement[$checkDoWhileStmt and not(Statement/Block) and not($allowEmptyLoop and Statement/EmptyStatement)]
+                |
+                (: The violation is reported on the sub statement -- not the if statement :)
+                //Statement[$checkIfElseStmt and parent::IfStatement and not(child::Block or child::IfStatement)
+                            (: Whitelists single if statements :)
+                            and ($checkSingleIfStmt
+                                 (: Inside this not(...) is the definition of a "single if statement" :)
+                                 or not(count(../Statement) = 1 (: No else stmt :)
+                                        (: Not the last branch of an 'if ... else if' chain :)
+                                        and not(parent::IfStatement[parent::Statement[parent::IfStatement]])))]
+                |
+                (: Reports case labels if one of their subordinate statements is not braced :)
+                //SwitchLabel[$checkCaseStmt]
+                             [count(following-sibling::BlockStatement except following-sibling::SwitchLabel[1]/following-sibling::BlockStatement) > 1
+                              or (some $stmt (: in only the block statements until the next label :)
+                                  in following-sibling::BlockStatement except following-sibling::SwitchLabel[1]/following-sibling::BlockStatement
+                                  satisfies not($stmt/Statement/Block))]
+```
+
+**Example(s):**
+
+``` java
+while (true)    // not recommended
+  x++;
+
+while (true) {  // preferred approach
+  x++;
+}
+```
+
+**This rule has the following properties:**
+
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|checkIfElseStmt|true|Require that 'if ... else' statements use braces|no|
+|checkSingleIfStmt|true|Require that 'if' statements with a single branch use braces|no|
+|checkWhileStmt|true|Require that 'while' loops use braces|no|
+|checkForStmt|true|Require that 'for' loops should use braces|no|
+|checkDoWhileStmt|true|Require that 'do ... while' loops use braces|no|
+|checkCaseStmt|false|Require that cases of a switch have braces|no|
+|allowEmptyLoop|false|Allow loops with an empty statement, e.g. 'while(true);'|no|
+
+**Use this rule by referencing it:**
+``` xml
+<rule ref="category/java/codestyle.xml/ControlStatementBraces" />
 ```
 
 ## DefaultPackage
@@ -471,6 +578,7 @@ boolean bar(int x, int y) {
 Use explicit scoping instead of accidental usage of default package private level.
 The rule allows methods and fields annotated with Guava's @VisibleForTesting.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration[@Interface='false']
 /ClassOrInterfaceBody
@@ -548,6 +656,7 @@ public class Foo {}
 Empty or auto-generated methods in an abstract class should be tagged as abstract. This helps to remove their inapproprate
 usage by developers who should be implementing their own versions in the concrete subclasses.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration[@Abstract = 'true']
     /ClassOrInterfaceBody
@@ -593,6 +702,7 @@ public abstract class ShouldBeAbstract {
 
 No need to explicitly extend Object.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ExtendsList/ClassOrInterfaceType[@Image='Object' or @Image='java.lang.Object']
 ```
@@ -638,11 +748,11 @@ public class HelloWorldBean {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|ignoreInterfaceDeclarations|false|Ignore Interface Declarations that precede fields.|
-|ignoreAnonymousClassDeclarations|true|Ignore Field Declarations, that are initialized with anonymous class declarations|
-|ignoreEnumDeclarations|true|Ignore Enum Declarations that precede fields.|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|ignoreInterfaceDeclarations|false|Ignore Interface Declarations that precede fields.|no|
+|ignoreAnonymousClassDeclarations|true|Ignore Field Declarations, that are initialized with anonymous class declarations|no|
+|ignoreEnumDeclarations|true|Ignore Enum Declarations that precede fields.|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -657,6 +767,7 @@ public class HelloWorldBean {
 
 Some for loops can be simplified to while loops, this makes them more concise.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ForStatement
   [not(LocalVariableDeclaration)]
@@ -682,6 +793,8 @@ public class Foo {
 
 ## ForLoopsMustUseBraces
 
+<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f;">Deprecated</span> 
+
 **Since:** PMD 0.7
 
 **Priority:** Medium (3)
@@ -690,6 +803,7 @@ Avoid using 'for' statements without using curly braces. If the code formatting 
 indentation is lost then it becomes difficult to separate the code being controlled 
 from the rest.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ForStatement[not(Statement/Block)]
 ```
@@ -714,6 +828,7 @@ for (int i = 0; i < 42; i++)
 
 Names for references to generic values should be limited to a single uppercase letter.
 
+**This rule is defined by the following XPath expression:**
 ```
 //TypeDeclaration/ClassOrInterfaceDeclaration/TypeParameters/TypeParameter[
   string-length(@Image) > 1 
@@ -747,7 +862,46 @@ public interface GenericDao<EF extends BaseModel, K extends Serializable> {
 <rule ref="category/java/codestyle.xml/GenericsNaming" />
 ```
 
+## IdenticalCatchBranches
+
+**Since:** PMD 6.4.0
+
+**Priority:** Medium (3)
+
+**Minimum Language Version:** Java 1.7
+
+Identical `catch` branches use up vertical space and increase the complexity of code without
+adding functionality. It's better style to collapse identical branches into a single multi-catch
+branch.
+
+**This rule is defined by the following Java class:** [net.sourceforge.pmd.lang.java.rule.codestyle.IdenticalCatchBranchesRule](https://github.com/pmd/pmd/blob/master/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/codestyle/IdenticalCatchBranchesRule.java)
+
+**Example(s):**
+
+``` java
+try {
+    // do something
+} catch (IllegalArgumentException e) {
+    throw e;
+} catch (IllegalStateException e) { // Can be collapsed into the previous block
+    throw e;
+}
+
+try {
+    // do something
+} catch (IllegalArgumentException | IllegalStateException e) { // This is better
+    throw e;
+}
+```
+
+**Use this rule by referencing it:**
+``` xml
+<rule ref="category/java/codestyle.xml/IdenticalCatchBranches" />
+```
+
 ## IfElseStmtsMustUseBraces
+
+<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f;">Deprecated</span> 
 
 **Since:** PMD 0.2
 
@@ -757,6 +911,7 @@ Avoid using if..else statements without using surrounding braces. If the code fo
 or indentation is lost then it becomes difficult to separate the code being controlled 
 from the rest.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Statement
  [parent::IfStatement[@Else='true']]
@@ -784,6 +939,8 @@ if (foo)
 
 ## IfStmtsMustUseBraces
 
+<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f;">Deprecated</span> 
+
 **Since:** PMD 1.0
 
 **Priority:** Medium (3)
@@ -792,6 +949,7 @@ Avoid using if statements without using braces to surround the code block. If th
 formatting or indentation is lost then it becomes difficult to separate the code being
 controlled from the rest.
 
+**This rule is defined by the following XPath expression:**
 ```
 //IfStatement[count(*) < 3][not(Statement/Block)]
 ```
@@ -820,6 +978,7 @@ if (foo) {  // preferred approach
 
 The Local Home interface of a Session EJB should be suffixed by 'LocalHome'.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration
 [
@@ -855,6 +1014,7 @@ public interface MissingProperSuffix extends javax.ejb.EJBLocalHome {}  // non-s
 
 The Local Interface of a Session EJB should be suffixed by 'Local'.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration
 [
@@ -916,6 +1076,7 @@ public class Bar {
 
 Fields, formal arguments, or local variable names that are too long can make the code difficult to follow.
 
+**This rule is defined by the following XPath expression:**
 ```
 //VariableDeclaratorId[string-length(@Image) > $minimum]
 ```
@@ -936,9 +1097,9 @@ public class Something {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|minimum|17|The variable length reporting threshold|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|minimum|17|The variable length reporting threshold|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -953,6 +1114,7 @@ public class Something {
 
 The EJB Specification states that any MessageDrivenBean or SessionBean should be suffixed by 'Bean'.
 
+**This rule is defined by the following XPath expression:**
 ```
 //TypeDeclaration/ClassOrInterfaceDeclaration
 [
@@ -1015,7 +1177,12 @@ public void foo2 (final String param) { // better, do stuff with param never ass
 
 **Priority:** High (1)
 
-Method names should always begin with a lower case character, and should not contain underscores.
+Configurable naming conventions for method declarations. This rule reports
+method declarations which do not match the regex that applies to their
+specific kind (e.g. JUnit test or native method). Each regex can be
+configured through properties.
+
+By default this rule uses the standard Java naming convention (Camel case).
 
 **This rule is defined by the following Java class:** [net.sourceforge.pmd.lang.java.rule.codestyle.MethodNamingConventionsRule](https://github.com/pmd/pmd/blob/master/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/codestyle/MethodNamingConventionsRule.java)
 
@@ -1030,9 +1197,14 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|checkNativeMethods|true|Check native methods|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|checkNativeMethods|true|<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f; font-size: 75%;">Deprecated</span>  Check native methods|no|
+|methodPattern|[a-z][a-zA-Z0-9]+|Regex which applies to instance method names|no|
+|staticPattern|[a-z][a-zA-Z0-9]+|Regex which applies to static method names|no|
+|nativePattern|[a-z][a-zA-Z0-9]+|Regex which applies to native method names|no|
+|junit3TestPattern|test[A-Z0-9][a-zA-Z0-9]*|Regex which applies to JUnit 3 test method names|no|
+|junit4TestPattern|[a-z][a-zA-Z0-9]+|Regex which applies to JUnit 4 test method names|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1047,6 +1219,7 @@ public class Foo {
 
 Detects when a non-field has a name starting with 'm_'.  This usually denotes a field and could be confusing.
 
+**This rule is defined by the following XPath expression:**
 ```
 //VariableDeclaratorId
 [starts-with(@Image, 'm_')]
@@ -1077,6 +1250,7 @@ public class Foo {
 
 Detects when a class or interface does not have a package definition.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration[count(preceding::PackageDeclaration) = 0]
 ```
@@ -1130,6 +1304,7 @@ public class OneReturnOnly1 {
 
 Detects when a package definition contains uppercase characters.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PackageDeclaration/Name[lower-case(@Image)!=@Image]
 ```
@@ -1188,6 +1363,7 @@ public int getLength(String[] strings) {
 
 Remote Interface of a Session EJB should not have a suffix.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration
 [
@@ -1231,6 +1407,7 @@ public interface BadSuffixBean extends javax.ejb.EJBObject {}
 
 A Remote Home interface type of a Session EJB should be suffixed by 'Home'.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration
 [
@@ -1266,6 +1443,7 @@ public interface MissingProperSuffix extends javax.ejb.EJBHome {}   // non-stand
 
 Short Classnames with fewer than e.g. five characters are not recommended.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration[string-length(@Image) < $minimum]
 ```
@@ -1279,9 +1457,9 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|minimum|5|Number of characters that are required as a minimum for a class name.|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|minimum|5|Number of characters that are required as a minimum for a class name.|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1296,6 +1474,7 @@ public class Foo {
 
 Method names that are very short are not helpful to the reader.
 
+**This rule is defined by the following XPath expression:**
 ```
 //MethodDeclarator[string-length(@Image) < $minimum]
 ```
@@ -1311,9 +1490,9 @@ public class ShortMethod {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|minimum|3|Number of characters that are required as a minimum for a method name.|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|minimum|3|Number of characters that are required as a minimum for a method name.|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1328,11 +1507,17 @@ public class ShortMethod {
 
 Fields, local variables, or parameter names that are very short are not helpful to the reader.
 
+**This rule is defined by the following XPath expression:**
 ```
 //VariableDeclaratorId[string-length(@Image) < $minimum]
- [not(ancestor::ForInit)]
- [not(../../VariableDeclarator and ../../../LocalVariableDeclaration and ../../../../ForStatement)]
- [not((ancestor::FormalParameter) and (ancestor::TryStatement))]
+ (: ForStatement :)
+ [not(../../..[self::ForInit])]
+ (: Foreach statement :)
+ [not(../../..[self::ForStatement])]
+ (: Catch statement parameter :)
+ [not(../..[self::CatchStatement])]
+ (: Lambda expression parameter :)
+ [not(parent::LambdaExpression or ../../..[self::LambdaExpression])]
 ```
 
 **Example(s):**
@@ -1354,9 +1539,9 @@ public class Something {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|minimum|3|Number of characters that are required as a minimum for a variable name.|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|minimum|3|Number of characters that are required as a minimum for a variable name.|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1372,6 +1557,7 @@ public class Something {
 Field names using all uppercase characters - Sun's Java naming conventions indicating constants - should
 be declared as final.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ClassOrInterfaceDeclaration[@Interface='false']
  /ClassOrInterfaceBody/ClassOrInterfaceBodyDeclaration/FieldDeclaration
@@ -1406,6 +1592,7 @@ unmaintainable, polluting its namespace with all the static members you import.
 Readers of your code (including you, a few months after you wrote it) will not know 
 which class a static member comes from (Sun 1.5 Language Guide).
 
+**This rule is defined by the following XPath expression:**
 ```
 .[count(ImportDeclaration[@Static = 'true']) > $maximumStaticImports]
 ```
@@ -1422,13 +1609,60 @@ import static Yoko; // Too much !
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|maximumStaticImports|4|All static imports can be disallowed by setting this to 0|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|maximumStaticImports|4|All static imports can be disallowed by setting this to 0|no|
 
 **Use this rule by referencing it:**
 ``` xml
 <rule ref="category/java/codestyle.xml/TooManyStaticImports" />
+```
+
+## UnnecessaryAnnotationValueElement
+
+**Since:** PMD 6.2.0
+
+**Priority:** Medium (3)
+
+Avoid the use of value in annotations when it's the only element.
+
+**This rule is defined by the following Java class:** [net.sourceforge.pmd.lang.java.rule.codestyle.UnnecessaryAnnotationValueElementRule](https://github.com/pmd/pmd/blob/master/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/codestyle/UnnecessaryAnnotationValueElementRule.java)
+
+**Example(s):**
+
+``` java
+@TestClassAnnotation(value = "TEST")
+public class Foo {
+
+    @TestMemberAnnotation(value = "TEST")
+    private String y;
+
+    @TestMethodAnnotation(value = "TEST")
+    public void bar() {
+        int x = 42;
+        return;
+    }
+}
+
+// should be
+
+@TestClassAnnotation("TEST")
+public class Foo {
+
+    @TestMemberAnnotation("TEST")
+    private String y;
+
+    @TestMethodAnnotation("TEST")
+    public void bar() {
+        int x = 42;
+        return;
+    }
+}
+```
+
+**Use this rule by referencing it:**
+``` xml
+<rule ref="category/java/codestyle.xml/UnnecessaryAnnotationValueElement" />
 ```
 
 ## UnnecessaryConstructor
@@ -1437,18 +1671,11 @@ import static Yoko; // Too much !
 
 **Priority:** Medium (3)
 
-This rule detects when a constructor is not necessary; i.e., when there is only one constructor,
-it's public, has an empty body, and takes no arguments.
+This rule detects when a constructor is not necessary; i.e., when there is only one constructor and the
+constructor is identical to the default constructor. The default constructor should has same access
+modifier as the declaring class. In an enum type, the default constructor is implicitly private.
 
-```
-//ClassOrInterfaceBody[count(ClassOrInterfaceBodyDeclaration/ConstructorDeclaration)=1]
-/ClassOrInterfaceBodyDeclaration/ConstructorDeclaration
-[@Public='true']
-[not(FormalParameters/*)]
-[not(BlockStatement)]
-[not(NameList)]
-[count(ExplicitConstructorInvocation/Arguments/ArgumentList/Expression)=0]
-```
+**This rule is defined by the following Java class:** [net.sourceforge.pmd.lang.java.rule.codestyle.UnnecessaryConstructorRule](https://github.com/pmd/pmd/blob/master/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/codestyle/UnnecessaryConstructorRule.java)
 
 **Example(s):**
 
@@ -1457,6 +1684,12 @@ public class Foo {
   public Foo() {}
 }
 ```
+
+**This rule has the following properties:**
+
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|ignoredAnnotations|javax.inject.Inject|Fully qualified names of the annotation types that should be ignored by this rule|yes. Delimiter is '\|'.|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1513,9 +1746,9 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|statementOrderMatters|true|If set to false this rule no longer requires the variable declaration and return statement to be on consecutive lines. Any variable that is used solely in a return statement will be reported.|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|statementOrderMatters|true|If set to false this rule no longer requires the variable declaration and return statement to be on consecutive lines. Any variable that is used solely in a return statement will be reported.|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1598,12 +1831,13 @@ public class Foo {
 
 Useless parentheses should be removed.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Expression[not(parent::PrimaryPrefix)]/PrimaryExpression[count(*)>1]
   /PrimaryPrefix/Expression
     [not(./CastExpression)]
     [not(./ConditionalExpression[@Ternary='true'])]
-    [not(./AdditiveExpression[//Literal[@StringLiteral='true']])]
+    [not(./AdditiveExpression)]
 |
 //Expression[not(parent::PrimaryPrefix)]/PrimaryExpression[count(*)=1]
   /PrimaryPrefix/Expression
@@ -1682,6 +1916,7 @@ public class Foo {
 
 Look for qualified this usages in the same class.
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression
 [PrimaryPrefix/Name[@Image]]
@@ -1749,20 +1984,20 @@ public class Foo {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|parameterSuffix|[]|Method parameter variable suffixes|
-|parameterPrefix|[]|Method parameter variable prefixes|
-|localSuffix|[]|Local variable suffixes|
-|localPrefix|[]|Local variable prefixes|
-|memberSuffix|[]|Member variable suffixes|
-|memberPrefix|[]|Member variable prefixes|
-|staticSuffix|[]|Static variable suffixes|
-|checkParameters|true|Check constructor and method parameter variables|
-|checkNativeMethodParameters|true|Check method parameter of native methods|
-|staticPrefix|[]|Static variable prefixes|
-|checkLocals|true|Check local variables|
-|checkMembers|true|Check member variables|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|parameterSuffix||Method parameter variable suffixes|yes. Delimiter is ','.|
+|parameterPrefix||Method parameter variable prefixes|yes. Delimiter is ','.|
+|localSuffix||Local variable suffixes|yes. Delimiter is ','.|
+|localPrefix||Local variable prefixes|yes. Delimiter is ','.|
+|memberSuffix||Member variable suffixes|yes. Delimiter is ','.|
+|memberPrefix||Member variable prefixes|yes. Delimiter is ','.|
+|staticSuffix||Static variable suffixes|yes. Delimiter is ','.|
+|checkParameters|true|Check constructor and method parameter variables|no|
+|checkNativeMethodParameters|true|Check method parameter of native methods|no|
+|staticPrefix||Static variable prefixes|yes. Delimiter is ','.|
+|checkLocals|true|Check local variables|no|
+|checkMembers|true|Check member variables|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -1770,6 +2005,8 @@ public class Foo {
 ```
 
 ## WhileLoopsMustUseBraces
+
+<span style="border-radius: 0.25em; color: #fff; padding: 0.2em 0.6em 0.3em; display: inline; background-color: #d9534f;">Deprecated</span> 
 
 **Since:** PMD 0.7
 
@@ -1779,6 +2016,7 @@ Avoid using 'while' statements without using braces to surround the code block. 
 formatting or indentation is lost then it becomes difficult to separate the code being
 controlled from the rest.
 
+**This rule is defined by the following XPath expression:**
 ```
 //WhileStatement[not(Statement/Block)]
 ```

@@ -6,6 +6,7 @@ package net.sourceforge.pmd.util.fxdesigner;
 
 import java.net.URL;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -13,7 +14,6 @@ import org.reactfx.EventStreams;
 
 import net.sourceforge.pmd.lang.ast.Node;
 import net.sourceforge.pmd.lang.ast.xpath.Attribute;
-import net.sourceforge.pmd.lang.ast.xpath.AttributeAxisIterator;
 import net.sourceforge.pmd.lang.java.ast.TypeNode;
 import net.sourceforge.pmd.lang.symboltable.NameDeclaration;
 import net.sourceforge.pmd.util.fxdesigner.model.MetricEvaluator;
@@ -39,19 +39,19 @@ import javafx.scene.control.TreeView;
  * @author Clément Fournier
  * @since 6.0.0
  */
+@SuppressWarnings("PMD.UnusedPrivateField")
 public class NodeInfoPanelController implements Initializable {
 
-    private final DesignerRoot designerRoot;
     private final MainDesignerController parent;
 
     @FXML
     private TabPane nodeInfoTabPane;
     @FXML
-    private Tab xpathAttributesTitledPane;
+    private Tab xpathAttributesTab;
     @FXML
     private ListView<String> xpathAttributesListView;
     @FXML
-    private Tab metricResultsTitledPane;
+    private Tab metricResultsTab;
     @FXML
     private ListView<MetricResult> metricResultsListView;
     @FXML
@@ -59,10 +59,9 @@ public class NodeInfoPanelController implements Initializable {
     @FXML
     private TreeView<Object> scopeHierarchyTreeView;
     private MetricEvaluator metricEvaluator = new MetricEvaluator();
+    private Node selectedNode;
 
-
-    public NodeInfoPanelController(DesignerRoot root, MainDesignerController mainController) {
-        this.designerRoot = root;
+    public NodeInfoPanelController(MainDesignerController mainController) {
         parent = mainController;
     }
 
@@ -75,7 +74,7 @@ public class NodeInfoPanelController implements Initializable {
                     .filterMap(o -> o instanceof NameDeclaration, o -> (NameDeclaration) o)
                     .subscribe(parent::onNameDeclarationSelected);
 
-        scopeHierarchyTreeView.setCellFactory(view -> new ScopeHierarchyTreeCell(parent));
+        scopeHierarchyTreeView.setCellFactory(view -> new ScopeHierarchyTreeCell());
     }
 
 
@@ -85,8 +84,11 @@ public class NodeInfoPanelController implements Initializable {
      * @param node Node to inspect
      */
     public void displayInfo(Node node) {
-
         Objects.requireNonNull(node, "Node cannot be null");
+
+        if (node.equals(selectedNode)) {
+            return;
+        }
 
         ObservableList<String> atts = getAttributes(node);
         xpathAttributesListView.setItems(atts);
@@ -116,9 +118,9 @@ public class NodeInfoPanelController implements Initializable {
 
 
     private void notifyMetricsAvailable(long numMetrics) {
-        metricResultsTitledPane.setText("Metrics\t(" + (numMetrics == 0 ? "none" : numMetrics) + ")");
+        metricResultsTab.setText("Metrics\t(" + (numMetrics == 0 ? "none" : numMetrics) + ")");
         metricsTitleLabel.setText("Metrics\t(" + (numMetrics == 0 ? "none" : numMetrics) + " available)");
-        metricResultsTitledPane.setDisable(numMetrics == 0);
+        metricResultsTab.setDisable(numMetrics == 0);
     }
 
 
@@ -136,15 +138,16 @@ public class NodeInfoPanelController implements Initializable {
      */
     private static ObservableList<String> getAttributes(Node node) {
         ObservableList<String> result = FXCollections.observableArrayList();
-        AttributeAxisIterator attributeAxisIterator = new AttributeAxisIterator(node);
+        Iterator<Attribute> attributeAxisIterator = node.getXPathAttributesIterator();
         while (attributeAxisIterator.hasNext()) {
             Attribute attribute = attributeAxisIterator.next();
+            // TODO the display should be handled in a ListCell
             result.add(attribute.getName() + " = "
                                + ((attribute.getValue() != null) ? attribute.getStringValue() : "null"));
         }
 
         if (node instanceof TypeNode) {
-            result.add("typeof() = " + ((TypeNode) node).getType());
+            result.add("typeIs() = " + ((TypeNode) node).getType());
         }
         Collections.sort(result);
         return result;

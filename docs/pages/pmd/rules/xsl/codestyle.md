@@ -6,6 +6,7 @@ folder: pmd/rules/xsl
 sidebaractiveurl: /pmd_rules_xsl.html
 editmepath: ../pmd-xml/src/main/resources/category/xsl/codestyle.xml
 keywords: Code Style, UseConcatOnce
+language: XSL
 ---
 ## UseConcatOnce
 
@@ -16,6 +17,7 @@ keywords: Code Style, UseConcatOnce
 The XPath concat() functions accepts as many arguments as required so you can have
 "concat($a,'b',$c)" rather than "concat($a,concat('b',$c)".
 
+**This rule is defined by the following XPath expression:**
 ```
 //node()[contains(substring-after(@select,'concat'),'concat')]
 ```

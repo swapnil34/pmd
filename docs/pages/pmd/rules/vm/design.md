@@ -6,6 +6,7 @@ folder: pmd/rules/vm
 sidebaractiveurl: /pmd_rules_vm.html
 editmepath: ../pmd-vm/src/main/resources/category/vm/design.xml
 keywords: Design, AvoidDeeplyNestedIfStmts, CollapsibleIfStatements, ExcessiveTemplateLength, NoInlineJavaScript, NoInlineStyles
+language: VM
 ---
 ## AvoidDeeplyNestedIfStmts
 
@@ -19,9 +20,9 @@ Avoid creating deeply nested if-then statements since they are harder to read an
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|problemDepth|3|The if statement depth reporting threshold|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|problemDepth|3|The if statement depth reporting threshold|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -55,11 +56,11 @@ The template is too long. It should be broken up into smaller pieces.
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|topscore||Top score value|
-|minimum||Minimum reporting threshold|
-|sigma||Sigma value|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|topscore||Top score value|no|
+|minimum||Minimum reporting threshold|no|
+|sigma||Sigma value|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -89,6 +90,7 @@ Avoid inline JavaScript. Import .js files instead.
 
 Avoid inline styles. Use css classes instead.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Text[matches(@literal, "<[^>]+\s[sS][tT][yY][lL][eE]\s*=")]
 ```

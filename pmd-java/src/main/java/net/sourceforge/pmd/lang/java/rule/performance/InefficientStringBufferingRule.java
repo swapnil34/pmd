@@ -121,10 +121,7 @@ public class InefficientStringBufferingRule extends AbstractJavaRule {
 
     private boolean isPrimitiveType(ASTName name) {
         ASTType type = getTypeNode(name);
-        if (type != null && !type.findChildrenOfType(ASTPrimitiveType.class).isEmpty()) {
-            return true;
-        }
-        return false;
+        return type != null && !type.findChildrenOfType(ASTPrimitiveType.class).isEmpty();
     }
 
     private ASTType getTypeNode(ASTName name) {
@@ -163,7 +160,7 @@ public class InefficientStringBufferingRule extends AbstractJavaRule {
         if (argList == null || argList.jjtGetNumChildren() > 1) {
             return false;
         }
-        return TypeHelper.isEither((TypedNameDeclaration) n.getNameDeclaration(), StringBuffer.class,
+        return TypeHelper.isExactlyAny((TypedNameDeclaration) n.getNameDeclaration(), StringBuffer.class,
                 StringBuilder.class);
     }
 

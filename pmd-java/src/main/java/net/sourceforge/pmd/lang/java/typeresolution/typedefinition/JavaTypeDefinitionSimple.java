@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,7 +100,7 @@ import java.util.logging.Logger;
     @Override
     public JavaTypeDefinition getGenericType(final String parameterName) {
         for (JavaTypeDefinition currTypeDef = this; currTypeDef != null;
-             currTypeDef = currTypeDef.getEnclosingClass()) {
+                currTypeDef = currTypeDef.getEnclosingClass()) {
             
             int paramIndex = getGenericTypeIndex(currTypeDef.getType().getTypeParameters(), parameterName);
             if (paramIndex != -1) {
@@ -110,16 +111,16 @@ import java.util.logging.Logger;
         // throw because we could not find parameterName
         StringBuilder builder = new StringBuilder("No generic parameter by name ").append(parameterName);
         for (JavaTypeDefinition currTypeDef = this; currTypeDef != null;
-             currTypeDef = currTypeDef.getEnclosingClass()) {
+                currTypeDef = currTypeDef.getEnclosingClass()) {
             
             builder.append("\n on class ");
-            builder.append(clazz.getSimpleName());
+            builder.append(currTypeDef.getType().getSimpleName());
         }
 
         LOG.log(Level.FINE, builder.toString());
         // TODO: throw eventually
         //throw new IllegalArgumentException(builder.toString());
-        return null;
+        return forClass(Object.class);
     }
 
     @Override
@@ -199,7 +200,15 @@ import java.util.logging.Logger;
         return forClass(Object.class);
     }
 
+
+    @Override
+    public boolean isArrayType() {
+        return clazz.isArray();
+    }
+
+
     // TODO: are generics okay like this?
+    @Override
     public JavaTypeDefinition getComponentType() {
         Class<?> componentType = getType().getComponentType();
 
@@ -208,6 +217,28 @@ import java.util.logging.Logger;
         }
 
         return forClass(componentType);
+    }
+
+
+    private Class<?> getElementTypeRec(Class<?> arrayType) {
+        return arrayType.isArray() ? getElementTypeRec(arrayType.getComponentType()) : arrayType;
+    }
+
+
+    @Override
+    public JavaTypeDefinition getElementType() {
+        return isArrayType() ? forClass(getElementTypeRec(getType())) : this;
+    }
+
+
+    @Override
+    public JavaTypeDefinition withDimensions(int numDimensions) {
+        if (numDimensions < 0) {
+            throw new IllegalArgumentException("Negative array dimension");
+        }
+        return numDimensions == 0
+                ? this
+                : forClass(Array.newInstance(getType(), (int[]) Array.newInstance(int.class, numDimensions)).getClass());
     }
 
     public boolean isClassOrInterface() {
@@ -235,25 +266,30 @@ import java.util.logging.Logger;
         return typeParameterCount;
     }
 
-    public boolean isArrayType() {
-        return clazz.isArray();
-    }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("JavaTypeDefinition [clazz=").append(clazz)
                 .append(", definitionType=").append(getDefinitionType())
                 .append(", genericArgs=[");
-        
+
+        // Forcefully resolve all generic types
+        for (int i = 0; i < genericArgs.size(); i++) {
+            getGenericType(i);
+        }
+
         for (final JavaTypeDefinition jtd : genericArgs) {
             sb.append(jtd.shallowString()).append(", ");
         }
-        
-        return sb.replace(sb.length() - 3, sb.length() - 1, "]") // last comma to bracket
-            .append(", isGeneric=").append(isGeneric)
+
+        if (!genericArgs.isEmpty()) {
+            sb.replace(sb.length() - 3, sb.length() - 1, "");   // remove last comma
+        }
+
+        return sb.append("], isGeneric=").append(isGeneric)
             .append("]\n").toString();
     }
-    
+
     @Override
     public String shallowString() {
         return new StringBuilder("JavaTypeDefinition [clazz=").append(clazz)
@@ -264,7 +300,7 @@ import java.util.logging.Logger;
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof JavaTypeDefinitionSimple)) {
+        if (!(obj instanceof JavaTypeDefinitionSimple)) {
             return false;
         }
 
@@ -340,8 +376,10 @@ import java.util.logging.Logger;
         return destinationSet;
     }
 
+
+    @Override
     public JavaTypeDefinition getAsSuper(Class<?> superClazz) {
-        if (clazz == superClazz) { // optimize for same class calls
+        if (Objects.equals(clazz, superClazz)) { // optimize for same class calls
             return this;
         }
 

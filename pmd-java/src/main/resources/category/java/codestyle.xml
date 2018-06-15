@@ -1,22 +1,23 @@
 <?xml version="1.0"?>
 
 <ruleset name="Code Style"
-    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
 
     <description>
-Rules which enforce a specific coding style.
+        Rules which enforce a specific coding style.
     </description>
 
     <rule name="AbstractNaming"
           language="java"
           since="1.4"
+          deprecated="true"
           message="Abstract classes should be named 'AbstractXXX'"
           class="net.sourceforge.pmd.lang.rule.XPathRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#abstractnaming">
         <description>
-Abstract classes should be named 'AbstractXXX'.
+            Abstract classes should be named 'AbstractXXX'.
         </description>
         <priority>3</priority>
         <properties>
@@ -370,16 +371,33 @@ public class Foo extends Bar{
 
     <rule name="ClassNamingConventions"
           since="1.2"
-          message="Class names should begin with an uppercase character"
+          message="The {0} name ''{1}'' doesn''t match ''{2}''"
           class="net.sourceforge.pmd.lang.java.rule.codestyle.ClassNamingConventionsRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#classnamingconventions">
         <description>
-Class names should always begin with an upper case character.
+            Configurable naming conventions for type declarations. This rule reports
+            type declarations which do not match the regex that applies to their
+            specific kind (e.g. enum or interface). Each regex can be configured through
+            properties.
+
+            By default this rule uses the standard Java naming convention (Pascal case),
+            and reports utility class names not ending with 'Util'.
         </description>
         <priority>1</priority>
         <example>
 <![CDATA[
-public class Foo {}
+// This is Pascal case, the recommended naming convention in Java
+// Note that the default values of this rule don't allow underscores 
+// or accented characters in type names
+public class FooBar {}
+
+// You may want abstract classes to be named 'AbstractXXX',
+// in which case you can customize the regex for abstract
+// classes to 'Abstract[A-Z]\w+'
+public abstract class Thing {}
+
+// This class doesn't respect the convention, and will be flagged
+public class Éléphant {}
 ]]>
         </example>
     </rule>
@@ -392,18 +410,9 @@ public class Foo {}
         <description>
 To avoid mistakes if we want that a Method, Constructor, Field or Nested class have a default access modifier
 we must add a comment at the beginning of it's declaration.
-By default the comment must be /* default */, if you want another, you have to provide a regexp.
+By default the comment must be /* default */ or /* package */, if you want another, you have to provide a regular expression.
         </description>
         <priority>3</priority>
-        <properties>
-            <property name="regex">
-                <value>
-<![CDATA[
-\/\*\s+default\s+\*\/
-]]>
-                </value>
-            </property>
-        </properties>
         <example>
 <![CDATA[
 public class Foo {
@@ -448,6 +457,71 @@ as "does the error case go first?" or "does the common case go first?".
 <![CDATA[
 boolean bar(int x, int y) {
     return (x != y) ? diff : same;
+}
+]]>
+        </example>
+    </rule>
+
+    <rule name="ControlStatementBraces"
+          language="java"
+          since="6.2.0"
+          message="This statement should have braces"
+          class="net.sourceforge.pmd.lang.rule.XPathRule"
+          externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#controlstatementbraces">
+        <description>
+            Enforce a policy for braces on control statements. It is recommended to use braces on 'if ... else'
+            statements and loop statements, even if they are optional. This usually makes the code clearer, and
+            helps prepare the future when you need to add another statement. That said, this rule lets you control
+            which statements are required to have braces via properties.
+
+            From 6.2.0 on, this rule supersedes WhileLoopMustUseBraces, ForLoopMustUseBraces, IfStmtMustUseBraces,
+            and IfElseStmtMustUseBraces.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="checkIfElseStmt" type="Boolean" value="true" description="Require that 'if ... else' statements use braces" />
+            <property name="checkSingleIfStmt" type="Boolean" value="true" description="Require that 'if' statements with a single branch use braces" />
+            <property name="checkWhileStmt" type="Boolean" value="true" description="Require that 'while' loops use braces" />
+            <property name="checkForStmt" type="Boolean" value="true" description="Require that 'for' loops should use braces" />
+            <property name="checkDoWhileStmt" type="Boolean" value="true" description="Require that 'do ... while' loops use braces" />
+            <property name="checkCaseStmt" type="Boolean" value="false" description="Require that cases of a switch have braces"/>
+
+            <property name="allowEmptyLoop" type="Boolean" value="false" description="Allow loops with an empty statement, e.g. 'while(true);'" />
+
+            <property name="version" value="2.0"/>
+            <property name="xpath">
+                <value><![CDATA[
+                //WhileStatement[$checkWhileStmt and not(Statement/Block) and not($allowEmptyLoop and Statement/EmptyStatement)]
+                |
+                //ForStatement[$checkForStmt and not(Statement/Block) and not($allowEmptyLoop and Statement/EmptyStatement)]
+                |
+                //DoStatement[$checkDoWhileStmt and not(Statement/Block) and not($allowEmptyLoop and Statement/EmptyStatement)]
+                |
+                (: The violation is reported on the sub statement -- not the if statement :)
+                //Statement[$checkIfElseStmt and parent::IfStatement and not(child::Block or child::IfStatement)
+                            (: Whitelists single if statements :)
+                            and ($checkSingleIfStmt
+                                 (: Inside this not(...) is the definition of a "single if statement" :)
+                                 or not(count(../Statement) = 1 (: No else stmt :)
+                                        (: Not the last branch of an 'if ... else if' chain :)
+                                        and not(parent::IfStatement[parent::Statement[parent::IfStatement]])))]
+                |
+                (: Reports case labels if one of their subordinate statements is not braced :)
+                //SwitchLabel[$checkCaseStmt]
+                             [count(following-sibling::BlockStatement except following-sibling::SwitchLabel[1]/following-sibling::BlockStatement) > 1
+                              or (some $stmt (: in only the block statements until the next label :)
+                                  in following-sibling::BlockStatement except following-sibling::SwitchLabel[1]/following-sibling::BlockStatement
+                                  satisfies not($stmt/Statement/Block))]
+                ]]></value>
+            </property>
+        </properties>
+        <example>
+            <![CDATA[
+while (true)    // not recommended
+  x++;
+
+while (true) {  // preferred approach
+  x++;
 }
 ]]>
         </example>
@@ -663,6 +737,7 @@ public class Foo {
     <rule name="ForLoopsMustUseBraces"
           language="java"
           since="0.7"
+          deprecated="true"
           message="Avoid using 'for' statements without curly braces"
           class="net.sourceforge.pmd.lang.rule.XPathRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#forloopsmustusebraces">
@@ -729,9 +804,43 @@ public interface GenericDao<EF extends BaseModel, K extends Serializable> {
         </example>
     </rule>
 
+
+    <rule name="IdenticalCatchBranches"
+          language="java"
+          since="6.4.0"
+          minimumLanguageVersion="1.7"
+          message="''catch'' branch identical to ''{0}'' branch"
+          class="net.sourceforge.pmd.lang.java.rule.codestyle.IdenticalCatchBranchesRule"
+          externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#identicalcatchbranches">
+        <description>
+            Identical `catch` branches use up vertical space and increase the complexity of code without
+            adding functionality. It's better style to collapse identical branches into a single multi-catch
+            branch.
+        </description>
+        <priority>3</priority>
+        <example>
+            <![CDATA[
+try {
+    // do something
+} catch (IllegalArgumentException e) {
+    throw e;
+} catch (IllegalStateException e) { // Can be collapsed into the previous block
+    throw e;
+}
+
+try {
+    // do something
+} catch (IllegalArgumentException | IllegalStateException e) { // This is better
+    throw e;
+}
+            ]]>
+        </example>
+    </rule>
+
     <rule name="IfElseStmtsMustUseBraces"
           language="java"
           since="0.2"
+          deprecated="true"
           message="Avoid using 'if...else' statements without curly braces"
           class="net.sourceforge.pmd.lang.rule.XPathRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#ifelsestmtsmustusebraces">
@@ -770,6 +879,7 @@ if (foo)
     <rule name="IfStmtsMustUseBraces"
           language="java"
           since="1.0"
+          deprecated="true"
           message="Avoid using if statements without curly braces"
           class="net.sourceforge.pmd.lang.rule.XPathRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#ifstmtsmustusebraces">
@@ -997,11 +1107,16 @@ public void foo2 (final String param) { // better, do stuff with param never ass
 
     <rule name="MethodNamingConventions"
           since="1.2"
-          message="Method name does not begin with a lower case character."
+          message="The {0} name ''{1}'' doesn''t match ''{2}''"
           class="net.sourceforge.pmd.lang.java.rule.codestyle.MethodNamingConventionsRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#methodnamingconventions">
         <description>
-Method names should always begin with a lower case character, and should not contain underscores.
+            Configurable naming conventions for method declarations. This rule reports
+            method declarations which do not match the regex that applies to their
+            specific kind (e.g. JUnit test or native method). Each regex can be
+            configured through properties.
+
+            By default this rule uses the standard Java naming convention (Camel case).
         </description>
         <priority>1</priority>
         <example>
@@ -1301,13 +1416,19 @@ Fields, local variables, or parameter names that are very short are not helpful 
         <priority>3</priority>
         <properties>
             <property name="minimum" type="Integer" value="3" min="1" max="100" description="Number of characters that are required as a minimum for a variable name."/>
+            <property name="version" value="2.0"/>
             <property name="xpath">
                 <value>
 <![CDATA[
 //VariableDeclaratorId[string-length(@Image) < $minimum]
- [not(ancestor::ForInit)]
- [not(../../VariableDeclarator and ../../../LocalVariableDeclaration and ../../../../ForStatement)]
- [not((ancestor::FormalParameter) and (ancestor::TryStatement))]
+ (: ForStatement :)
+ [not(../../..[self::ForInit])]
+ (: Foreach statement :)
+ [not(../../..[self::ForStatement])]
+ (: Catch statement parameter :)
+ [not(../..[self::CatchStatement])]
+ (: Lambda expression parameter :)
+ [not(parent::LambdaExpression or ../../..[self::LambdaExpression])]
 ]]>
                 </value>
             </property>
@@ -1400,32 +1521,63 @@ import static Yoko; // Too much !
         </example>
     </rule>
 
+
+    <rule name="UnnecessaryAnnotationValueElement"
+          since="6.2.0"
+          message="Avoid the use of value in annotations when it's the only element"
+          class="net.sourceforge.pmd.lang.java.rule.codestyle.UnnecessaryAnnotationValueElementRule"
+          externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#unnecessaryannotationvalueelement">
+        <description>
+            Avoid the use of value in annotations when it's the only element.
+        </description>
+        <priority>3</priority>
+        <example>
+            <![CDATA[
+@TestClassAnnotation(value = "TEST")
+public class Foo {
+
+    @TestMemberAnnotation(value = "TEST")
+    private String y;
+
+    @TestMethodAnnotation(value = "TEST")
+    public void bar() {
+        int x = 42;
+        return;
+    }
+}
+
+// should be
+
+@TestClassAnnotation("TEST")
+public class Foo {
+
+    @TestMemberAnnotation("TEST")
+    private String y;
+
+    @TestMethodAnnotation("TEST")
+    public void bar() {
+        int x = 42;
+        return;
+    }
+}
+
+]]>
+        </example>
+    </rule>
+
+
     <rule name="UnnecessaryConstructor"
           language="java"
           since="1.0"
           message="Avoid unnecessary constructors - the compiler will generate these for you"
-          class="net.sourceforge.pmd.lang.rule.XPathRule"
+          class="net.sourceforge.pmd.lang.java.rule.codestyle.UnnecessaryConstructorRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#unnecessaryconstructor">
         <description>
-This rule detects when a constructor is not necessary; i.e., when there is only one constructor,
-it's public, has an empty body, and takes no arguments.
+This rule detects when a constructor is not necessary; i.e., when there is only one constructor and the
+constructor is identical to the default constructor. The default constructor should has same access
+modifier as the declaring class. In an enum type, the default constructor is implicitly private.
         </description>
         <priority>3</priority>
-        <properties>
-            <property name="xpath">
-                <value>
-<![CDATA[
-//ClassOrInterfaceBody[count(ClassOrInterfaceBodyDeclaration/ConstructorDeclaration)=1]
-/ClassOrInterfaceBodyDeclaration/ConstructorDeclaration
-[@Public='true']
-[not(FormalParameters/*)]
-[not(BlockStatement)]
-[not(NameList)]
-[count(ExplicitConstructorInvocation/Arguments/ArgumentList/Expression)=0]
-]]>
-                </value>
-            </property>
-        </properties>
         <example>
 <![CDATA[
 public class Foo {
@@ -1482,7 +1634,7 @@ public class Foo {
     <rule name="UnnecessaryModifier"
           language="java"
           since="1.02"
-          message="Avoid modifiers which are implied by the context"
+          message="Unnecessary modifier{0} on {1} ''{2}''{3}"
           class="net.sourceforge.pmd.lang.java.rule.codestyle.UnnecessaryModifierRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#unnecessarymodifier">
         <description>
@@ -1554,7 +1706,7 @@ public class Foo {
   /PrimaryPrefix/Expression
     [not(./CastExpression)]
     [not(./ConditionalExpression[@Ternary='true'])]
-    [not(./AdditiveExpression[//Literal[@StringLiteral='true']])]
+    [not(./AdditiveExpression)]
 |
 //Expression[not(parent::PrimaryPrefix)]/PrimaryExpression[count(*)=1]
   /PrimaryPrefix/Expression
@@ -1700,6 +1852,7 @@ public class Foo {
     <rule name="WhileLoopsMustUseBraces"
           language="java"
           since="0.7"
+          deprecated="true"
           message="Avoid using 'while' statements without curly braces"
           class="net.sourceforge.pmd.lang.rule.XPathRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_java_codestyle.html#whileloopsmustusebraces">

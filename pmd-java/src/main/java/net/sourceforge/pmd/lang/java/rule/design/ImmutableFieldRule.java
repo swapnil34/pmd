@@ -4,7 +4,6 @@
 
 package net.sourceforge.pmd.lang.java.rule.design;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +23,7 @@ import net.sourceforge.pmd.lang.java.ast.ASTTryStatement;
 import net.sourceforge.pmd.lang.java.ast.ASTVariableInitializer;
 import net.sourceforge.pmd.lang.java.ast.ASTWhileStatement;
 import net.sourceforge.pmd.lang.java.ast.AccessNode;
+import net.sourceforge.pmd.lang.java.ast.Annotatable;
 import net.sourceforge.pmd.lang.java.rule.AbstractLombokAwareRule;
 import net.sourceforge.pmd.lang.java.symboltable.JavaNameOccurrence;
 import net.sourceforge.pmd.lang.java.symboltable.VariableNameDeclaration;
@@ -55,7 +55,8 @@ public class ImmutableFieldRule extends AbstractLombokAwareRule {
             AccessNode accessNodeParent = field.getAccessNodeParent();
             if (accessNodeParent.isStatic() || !accessNodeParent.isPrivate() || accessNodeParent.isFinal()
                     || accessNodeParent.isVolatile()
-                    || hasClassLombokAnnotation()) {
+                    || hasClassLombokAnnotation()
+                    || hasIgnoredAnnotation((Annotatable) accessNodeParent)) {
                 continue;
             }
 
@@ -136,9 +137,7 @@ public class ImmutableFieldRule extends AbstractLombokAwareRule {
     }
 
     private List<ASTConstructorDeclaration> findAllConstructors(ASTClassOrInterfaceDeclaration node) {
-        List<ASTConstructorDeclaration> cons = new ArrayList<>();
-        node.getFirstChildOfType(ASTClassOrInterfaceBody.class).findDescendantsOfType(ASTConstructorDeclaration.class,
-                cons, false);
-        return cons;
+        return node.getFirstChildOfType(ASTClassOrInterfaceBody.class)
+                .findDescendantsOfType(ASTConstructorDeclaration.class);
     }
 }

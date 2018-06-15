@@ -144,9 +144,6 @@ public class CPDConfiguration extends AbstractConfiguration {
         }
     }
 
-    public CPDConfiguration() {
-    }
-
     @Parameter(names = "--encoding", description = "Character encoding to use when processing files", required = false)
     public void setEncoding(String encoding) {
         this.encoding = encoding;
@@ -239,7 +236,7 @@ public class CPDConfiguration extends AbstractConfiguration {
             if (method != null) {
                 method.invoke(renderer, encoding);
             }
-        } catch (IntrospectionException e) {
+        } catch (IntrospectionException ignored) {
             // ignored - maybe this renderer doesn't have a encoding property
         }
     }
@@ -354,7 +351,7 @@ public class CPDConfiguration extends AbstractConfiguration {
             }
         }
 
-        FilenameFilter filter = new FilenameFilter() {
+        return new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 File f = new File(dir, name);
@@ -365,7 +362,6 @@ public class CPDConfiguration extends AbstractConfiguration {
                 return languageFilter.accept(dir, name);
             }
         };
-        return filter;
     }
 
     /**

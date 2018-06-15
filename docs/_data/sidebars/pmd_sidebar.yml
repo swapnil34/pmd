@@ -172,6 +172,9 @@ entries:
         - title: Performance
           output: web, pdf
           url: /pmd_rules_java_performance.html
+        - title: Security
+          output: web, pdf
+          url: /pmd_rules_java_security.html
     - title: null
       output: web, pdf
       subfolders:
@@ -308,7 +311,7 @@ entries:
       url: /pmd_devdocs_building.html
       output: web, pdf
     - title: Contributing
-      url: /pmd_devdocs_contributing.html
+      external_url: https://github.com/pmd/pmd/blob/master/CONTRIBUTING.md
       output: web, pdf
     - title: Writing documentation
       url: /pmd_devdocs_writing_documentation.html

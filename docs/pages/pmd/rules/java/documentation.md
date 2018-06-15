@@ -6,6 +6,7 @@ folder: pmd/rules/java
 sidebaractiveurl: /pmd_rules_java.html
 editmepath: ../pmd-java/src/main/resources/category/java/documentation.xml
 keywords: Documentation, CommentContent, CommentRequired, CommentSize, UncommentedEmptyConstructor, UncommentedEmptyMethodBody
+language: Java
 ---
 ## CommentContent
 
@@ -25,11 +26,10 @@ A rule for the politically correct... we don't want to offend anyone.
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|disallowedTerms|[idiot, jerk]|Illegal terms or phrases|
-|caseSensitive|false|Case sensitive|
-|wordsAreRegex|false|Use regular expressions|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|disallowedTerms|idiot \| jerk|Illegal terms or phrases|yes. Delimiter is '\|'.|
+|caseSensitive|false|Case sensitive|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -58,16 +58,16 @@ Denotes whether comments are required (or unwanted) for specific language elemen
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|serialVersionUIDCommentRequired|Ignored|Serial version UID comments. Possible values: [Required, Ignored, Unwanted]|
-|enumCommentRequirement|Required|Enum comments. Possible values: [Required, Ignored, Unwanted]|
-|protectedMethodCommentRequirement|Required|Protected method constructor comments. Possible values: [Required, Ignored, Unwanted]|
-|publicMethodCommentRequirement|Required|Public method and constructor comments. Possible values: [Required, Ignored, Unwanted]|
-|fieldCommentRequirement|Required|Field comments. Possible values: [Required, Ignored, Unwanted]|
-|headerCommentRequirement|Required|Header comments. Possible values: [Required, Ignored, Unwanted]|
-|methodWithOverrideCommentRequirement|Ignored|Comments on @Override methods. Possible values: [Required, Ignored, Unwanted]|
-|accessorCommentRequirement|Ignored|Comments on getters and setters". Possible values: [Required, Ignored, Unwanted]|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|serialVersionUIDCommentRequired|Ignored|Serial version UID comments. Possible values: [Required, Ignored, Unwanted]|no|
+|enumCommentRequirement|Required|Enum comments. Possible values: [Required, Ignored, Unwanted]|no|
+|protectedMethodCommentRequirement|Required|Protected method constructor comments. Possible values: [Required, Ignored, Unwanted]|no|
+|publicMethodCommentRequirement|Required|Public method and constructor comments. Possible values: [Required, Ignored, Unwanted]|no|
+|fieldCommentRequirement|Required|Field comments. Possible values: [Required, Ignored, Unwanted]|no|
+|headerCommentRequirement|Required|Header comments. Possible values: [Required, Ignored, Unwanted]|no|
+|methodWithOverrideCommentRequirement|Ignored|Comments on @Override methods. Possible values: [Required, Ignored, Unwanted]|no|
+|accessorCommentRequirement|Ignored|Comments on getters and setters". Possible values: [Required, Ignored, Unwanted]|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -107,10 +107,10 @@ Determines whether the dimensions of non-header comments found are within the sp
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|maxLines|6|Maximum lines|
-|maxLineLength|80|Maximum line length|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|maxLines|6|Maximum lines|no|
+|maxLineLength|80|Maximum line length|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -128,10 +128,11 @@ contain statements, but there is no comment. By explicitly commenting empty
 constructors it is easier to distinguish between intentional (commented)
 and unintentional empty constructors.
 
+**This rule is defined by the following XPath expression:**
 ```
 //ConstructorDeclaration[@Private='false']
                         [count(BlockStatement) = 0 and ($ignoreExplicitConstructorInvocation = 'true' or not(ExplicitConstructorInvocation)) and @containsComment = 'false']
-                        [not(../Annotation/MarkerAnnotation/Name[typeof(@Image, 'javax.inject.Inject', 'Inject')])]
+                        [not(../Annotation/MarkerAnnotation/Name[typeIs('javax.inject.Inject')])]
 ```
 
 **Example(s):**
@@ -144,9 +145,9 @@ public Foo() {
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|ignoreExplicitConstructorInvocation|false|Ignore explicit constructor invocation when deciding whether constructor is empty or not|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|ignoreExplicitConstructorInvocation|false|Ignore explicit constructor invocation when deciding whether constructor is empty or not|no|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -164,6 +165,7 @@ statements, but there is no comment. By explicitly commenting empty method bodie
 it is easier to distinguish between intentional (commented) and unintentional
 empty methods.
 
+**This rule is defined by the following XPath expression:**
 ```
 //MethodDeclaration/Block[count(BlockStatement) = 0 and @containsComment = 'false']
 ```

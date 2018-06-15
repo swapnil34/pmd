@@ -6,6 +6,7 @@ folder: pmd/rules/pom
 sidebaractiveurl: /pmd_rules_pom.html
 editmepath: ../pmd-xml/src/main/resources/category/pom/errorprone.xml
 keywords: Error Prone, InvalidDependencyTypes, ProjectVersionAsDependencyVersion
+language: Maven POM
 ---
 ## InvalidDependencyTypes
 
@@ -18,6 +19,7 @@ the entry is just ignored, which might have the effect, that the wrong version o
 
 The following types are considered valid: pom, jar, maven-plugin, ejb, war, ear, rar, par.
 
+**This rule is defined by the following XPath expression:**
 ```
 //dependencyManagement/dependency/type/text[not(@Image = $validTypes)]
 ```
@@ -43,9 +45,9 @@ The following types are considered valid: pom, jar, maven-plugin, ejb, war, ear,
 
 **This rule has the following properties:**
 
-|Name|Default Value|Description|
-|----|-------------|-----------|
-|validTypes|[pom, jar, maven-plugin, ejb, war, ear, rar, par]|Set of valid types.|
+|Name|Default Value|Description|Multivalued|
+|----|-------------|-----------|-----------|
+|validTypes|pom , jar , maven-plugin , ejb , war , ear , rar , par|Set of valid types.|yes. Delimiter is ','.|
 
 **Use this rule by referencing it:**
 ``` xml
@@ -61,8 +63,15 @@ The following types are considered valid: pom, jar, maven-plugin, ejb, war, ear,
 Using that expression in dependency declarations seems like a shortcut, but it can go wrong.
 By far the most common problem is the use of ${project.version} in a BOM or parent POM.
 
+**This rule is defined by the following XPath expression:**
 ```
-//dependency/version/text[contains(@Image,'{project.version}')]
+//dependencies/dependency
+    [contains(version/text/@Image,'{project.version}')]
+    [
+        (/project/parent/groupId and groupId/text/@Image != /project/parent/groupId/text/@Image)
+        or
+        (/project/groupId and groupId/text/@Image != /project/groupId/text/@Image)
+    ]/version
 ```
 
 **Example(s):**

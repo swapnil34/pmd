@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,13 +79,14 @@ public class PMDTaskImpl {
         this.failuresPropertyName = task.getFailuresPropertyName();
         configuration.setMinimumPriority(RulePriority.valueOf(task.getMinimumPriority()));
         configuration.setAnalysisCacheLocation(task.getCacheLocation());
+        configuration.setIgnoreIncrementalAnalysis(task.isNoCache());
 
         SourceLanguage version = task.getSourceLanguage();
         if (version != null) {
             LanguageVersion languageVersion = LanguageRegistry
-                    .findLanguageVersionByTerseName(version.getName() + " " + version.getVersion());
+                    .findLanguageVersionByTerseName(version.getName() + ' ' + version.getVersion());
             if (languageVersion == null) {
-                throw new BuildException("The following language is not supported:" + version + ".");
+                throw new BuildException("The following language is not supported:" + version + '.');
             }
             configuration.setDefaultLanguageVersion(languageVersion);
         }
@@ -270,8 +269,8 @@ public class PMDTaskImpl {
     }
 
     public void execute() throws BuildException {
-        final Handler antLogHandler = new AntLogHandler(project);
-        final ScopedLogHandlersManager logManager = new ScopedLogHandlersManager(Level.FINEST, antLogHandler);
+        final AntLogHandler antLogHandler = new AntLogHandler(project);
+        final ScopedLogHandlersManager logManager = new ScopedLogHandlersManager(antLogHandler.getAntLogLevel(), antLogHandler);
         try {
             doTask();
         } finally {

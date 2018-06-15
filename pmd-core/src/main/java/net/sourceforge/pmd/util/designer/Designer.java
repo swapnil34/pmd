@@ -35,7 +35,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.ActionMap;
@@ -223,7 +222,7 @@ public class Designer implements ClipboardOwner {
                 }
             }
         }
-        return languageVersions.toArray(new LanguageVersion[languageVersions.size()]);
+        return languageVersions.toArray(new LanguageVersion[0]);
     }
 
     private LanguageVersion getLanguageVersion() {
@@ -313,7 +312,7 @@ public class Designer implements ClipboardOwner {
 
         @Override
         public Enumeration<TreeNode> children() {
-            Enumeration<TreeNode> e = new Enumeration<TreeNode>() {
+            return new Enumeration<TreeNode>() {
                 int i = 0;
 
                 @Override
@@ -326,7 +325,6 @@ public class Designer implements ClipboardOwner {
                     return kids[i++];
                 }
             };
-            return e;
         }
 
         @Override
@@ -396,7 +394,7 @@ public class Designer implements ClipboardOwner {
                 getChildAt(0); // force it to build kids
             }
 
-            Enumeration<TreeNode> e = new Enumeration<TreeNode>() {
+            return new Enumeration<TreeNode>() {
                 int i = 0;
 
                 @Override
@@ -409,7 +407,6 @@ public class Designer implements ClipboardOwner {
                     return kids[i++];
                 }
             };
-            return e;
         }
 
         @Override
@@ -913,6 +910,7 @@ public class Designer implements ClipboardOwner {
                         undoManager.undo();
                     }
                 } catch (CannotUndoException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -926,6 +924,7 @@ public class Designer implements ClipboardOwner {
                         undoManager.redo();
                     }
                 } catch (CannotRedoException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -989,6 +988,7 @@ public class Designer implements ClipboardOwner {
 
     @Override
     public void lostOwnership(Clipboard clipboard, Transferable contents) {
+        // ignored
     }
 
     private void loadSettings() {

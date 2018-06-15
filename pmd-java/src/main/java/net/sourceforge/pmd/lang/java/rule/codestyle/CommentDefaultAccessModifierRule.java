@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.sourceforge.pmd.lang.java.ast.ASTAnnotation;
+import net.sourceforge.pmd.lang.java.ast.ASTAnyTypeDeclaration;
 import net.sourceforge.pmd.lang.java.ast.ASTClassOrInterfaceBodyDeclaration;
 import net.sourceforge.pmd.lang.java.ast.ASTClassOrInterfaceDeclaration;
 import net.sourceforge.pmd.lang.java.ast.ASTCompilationUnit;
@@ -18,10 +19,11 @@ import net.sourceforge.pmd.lang.java.ast.ASTMethodDeclaration;
 import net.sourceforge.pmd.lang.java.ast.ASTMethodDeclarator;
 import net.sourceforge.pmd.lang.java.ast.ASTName;
 import net.sourceforge.pmd.lang.java.ast.ASTVariableDeclaratorId;
+import net.sourceforge.pmd.lang.java.ast.AbstractAnyTypeDeclaration;
 import net.sourceforge.pmd.lang.java.ast.AbstractJavaAccessNode;
 import net.sourceforge.pmd.lang.java.ast.Comment;
 import net.sourceforge.pmd.lang.java.rule.documentation.AbstractCommentRule;
-import net.sourceforge.pmd.properties.StringProperty;
+import net.sourceforge.pmd.properties.RegexProperty;
 
 /**
  * Check for Methods, Fields and Nested Classes that have a default access
@@ -31,7 +33,8 @@ import net.sourceforge.pmd.properties.StringProperty;
  */
 public class CommentDefaultAccessModifierRule extends AbstractCommentRule {
 
-    private static final StringProperty REGEX_DESCRIPTOR = new StringProperty("regex", "Regular expression", "", 1.0f);
+    private static final RegexProperty REGEX_DESCRIPTOR = RegexProperty.named("regex")
+            .desc("Regular expression").defaultValue("\\/\\*\\s+(default|package)\\s+\\*\\/").uiOrder(1.0f).build();
     private static final String MESSAGE = "To avoid mistakes add a comment "
             + "at the beginning of the %s %s if you want a default access modifier";
     private final Set<Integer> interestingLineNumberComments = new HashSet<Integer>();
@@ -40,21 +43,12 @@ public class CommentDefaultAccessModifierRule extends AbstractCommentRule {
         definePropertyDescriptor(REGEX_DESCRIPTOR);
     }
 
-    public CommentDefaultAccessModifierRule(final String regex) {
-        this();
-        setRegex(regex);
-    }
-
-    public void setRegex(final String regex) {
-        setProperty(CommentDefaultAccessModifierRule.REGEX_DESCRIPTOR, regex);
-    }
-
     @Override
     public Object visit(final ASTCompilationUnit node, final Object data) {
         interestingLineNumberComments.clear();
         final List<Comment> comments = node.getComments();
         for (final Comment comment : comments) {
-            if (comment.getImage().matches(getProperty(REGEX_DESCRIPTOR).trim())) {
+            if (getProperty(REGEX_DESCRIPTOR).matcher(comment.getImage()).matches()) {
                 interestingLineNumberComments.add(comment.getBeginLine());
             }
         }
@@ -97,10 +91,15 @@ public class CommentDefaultAccessModifierRule extends AbstractCommentRule {
     }
 
     private boolean shouldReport(final AbstractJavaAccessNode decl) {
-        List<ASTClassOrInterfaceDeclaration> parentClassOrInterface = decl
-                .getParentsOfType(ASTClassOrInterfaceDeclaration.class);
-        // ignore if is a Interface
-        return (!parentClassOrInterface.isEmpty() && !parentClassOrInterface.get(0).isInterface())
+        final AbstractAnyTypeDeclaration parentClassOrInterface = decl
+                .getFirstParentOfType(AbstractAnyTypeDeclaration.class);
+
+        boolean isConcreteClass = parentClassOrInterface.getTypeKind() == ASTAnyTypeDeclaration.TypeKind.CLASS;
+        boolean isEnumConstructor = parentClassOrInterface.getTypeKind() == ASTAnyTypeDeclaration.TypeKind.ENUM
+                && decl instanceof ASTConstructorDeclaration;
+
+        // ignore if it's an Interface / Annotation / Enum constructor
+        return (isConcreteClass || !isEnumConstructor)
                 // check if the field/method/nested class has a default access
                 // modifier
                 && decl.isPackagePrivate()
@@ -117,14 +116,9 @@ public class CommentDefaultAccessModifierRule extends AbstractCommentRule {
         if (parent != null) {
             List<ASTAnnotation> annotations = parent.findChildrenOfType(ASTAnnotation.class);
             for (ASTAnnotation annotation : annotations) {
-                List<ASTName> names = annotation.findDescendantsOfType(ASTName.class);
-                for (ASTName name : names) {
-                    if (name.hasImageEqualTo("VisibleForTesting")) {
-                        result = false;
-                        break;
-                    }
-                }
-                if (result == false) {
+                final ASTName name = annotation.getFirstDescendantOfType(ASTName.class);
+                if (name.hasImageEqualTo("VisibleForTesting")) {
+                    result = false;
                     break;
                 }
             }

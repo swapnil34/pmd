@@ -6,6 +6,7 @@ folder: pmd/rules/plsql
 sidebaractiveurl: /pmd_rules_plsql.html
 editmepath: ../pmd-plsql/src/main/resources/category/plsql/errorprone.xml
 keywords: Error Prone, TO_DATE_TO_CHAR, TO_DATEWithoutDateFormat, TO_TIMESTAMPWithoutDateFormat
+language: PLSQL
 ---
 ## TO_DATE_TO_CHAR
 
@@ -15,6 +16,7 @@ keywords: Error Prone, TO_DATE_TO_CHAR, TO_DATEWithoutDateFormat, TO_TIMESTAMPWi
 
 TO_DATE(TO_CHAR(date-variable)) used to remove time component - use TRUNC(date-variable)
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression
     [PrimaryPrefix/Name/@Image='TO_DATE']
@@ -56,6 +58,7 @@ END date_utilities;
 
 TO_DATE without date format- use TO_DATE(expression, date-format)
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression[PrimaryPrefix/Name/@Image='TO_DATE'  and count(PrimarySuffix/Arguments/ArgumentList/Argument) = 1 ]
 ```
@@ -104,6 +107,7 @@ END date_utilities;
 
 TO_TIMESTAMP without date format- use TO_TIMESTAMP(expression, date-format)
 
+**This rule is defined by the following XPath expression:**
 ```
 //PrimaryExpression[PrimaryPrefix/Name/@Image='TO_TIMESTAMP'  and count(PrimarySuffix/Arguments/ArgumentList/Argument) = 1 ]
 ```

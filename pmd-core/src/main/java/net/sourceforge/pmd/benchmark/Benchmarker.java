@@ -37,10 +37,10 @@ import net.sourceforge.pmd.util.FileUtil;
 import net.sourceforge.pmd.util.datasource.DataSource;
 
 /**
- *
- *
+ * @deprecated use {@link TimeTracker} instead
  */
-public class Benchmarker {
+@Deprecated
+public final class Benchmarker {
 
     private static final Map<String, BenchmarkResult> BENCHMARKS_BY_NAME = new HashMap<>();
 

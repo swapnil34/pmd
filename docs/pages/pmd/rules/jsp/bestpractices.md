@@ -6,6 +6,7 @@ folder: pmd/rules/jsp
 sidebaractiveurl: /pmd_rules_jsp.html
 editmepath: ../pmd-jsp/src/main/resources/category/jsp/bestpractices.xml
 keywords: Best Practices, DontNestJsfInJstlIteration, NoClassAttribute, NoHtmlComments, NoJspForward
+language: Java Server Pages
 ---
 ## DontNestJsfInJstlIteration
 
@@ -15,6 +16,7 @@ keywords: Best Practices, DontNestJsfInJstlIteration, NoClassAttribute, NoHtmlCo
 
 Do not nest JSF component custom actions inside a custom action that iterates over its body.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Element[ @Name="c:forEach" ] // Element[ @NamespacePrefix="h" or @NamespacePrefix="f" ]
 ```
@@ -46,6 +48,7 @@ Do not nest JSF component custom actions inside a custom action that iterates ov
 
 Do not use an attribute called 'class'. Use "styleclass" for CSS styles.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Attribute[ upper-case(@Name)="CLASS" ]
 ```
@@ -73,6 +76,7 @@ In a production system, HTML comments increase the payload
 between the application server to the client, and serve
 little other purpose. Consider switching to JSP comments.
 
+**This rule is defined by the following XPath expression:**
 ```
 //CommentTag
 ```
@@ -102,6 +106,7 @@ little other purpose. Consider switching to JSP comments.
 
 Do not do a forward from within a JSP file.
 
+**This rule is defined by the following XPath expression:**
 ```
 //Element[ @Name="jsp:forward" ]
 ```

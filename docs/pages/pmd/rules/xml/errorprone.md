@@ -6,6 +6,7 @@ folder: pmd/rules/xml
 sidebaractiveurl: /pmd_rules_xml.html
 editmepath: ../pmd-xml/src/main/resources/category/xml/errorprone.xml
 keywords: Error Prone, MistypedCDATASection
+language: XML
 ---
 ## MistypedCDATASection
 
@@ -15,6 +16,7 @@ keywords: Error Prone, MistypedCDATASection
 
 An XML CDATA section begins with a <!CDATA[ marker, which has only one [, and ends with a ]]> marker, which has only two ].
 
+**This rule is defined by the following XPath expression:**
 ```
 //cdata-section[starts-with(@Image,'[') or ends-with(@Image,']')]
 ```

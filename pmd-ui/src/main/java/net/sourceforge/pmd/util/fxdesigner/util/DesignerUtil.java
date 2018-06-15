@@ -9,12 +9,17 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import net.sourceforge.pmd.lang.Language;
@@ -25,6 +30,10 @@ import net.sourceforge.pmd.lang.rule.xpath.XPathRuleQuery;
 
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Tooltip;
+import javafx.util.Callback;
 import javafx.util.StringConverter;
 
 
@@ -32,12 +41,12 @@ import javafx.util.StringConverter;
  * @author Clément Fournier
  * @since 6.0.0
  */
-public class DesignerUtil {
+public final class DesignerUtil {
 
 
     private static final Path PMD_SETTINGS_DIR = Paths.get(System.getProperty("user.home"), ".pmd");
     private static final File DESIGNER_SETTINGS_FILE = PMD_SETTINGS_DIR.resolve("designer.xml").toFile();
-
+    private static final Pattern JJT_ACCEPT_PATTERN = Pattern.compile("net.sourceforge.pmd.lang.\\w++.ast.AST(\\w+).jjtAccept");
 
     private static List<LanguageVersion> supportedLanguageVersions;
     private static Map<String, LanguageVersion> extensionsToLanguage;
@@ -80,6 +89,25 @@ public class DesignerUtil {
     }
 
 
+    public static <T> Callback<ListView<T>, ListCell<T>> simpleListCellFactory(Function<T, String> converter, Function<T, String> toolTipMaker) {
+        return collection -> new ListCell<T>() {
+            @Override
+            protected void updateItem(T item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                    Tooltip.uninstall(this, getTooltip());
+                } else {
+                    setText(converter.apply(item));
+                    Tooltip.install(this, new Tooltip(toolTipMaker.apply(item)));
+                }
+            }
+        };
+    }
+
+
     public static <T> StringConverter<T> stringConverter(Function<T, String> toString, Function<String, T> fromString) {
         return new StringConverter<T>() {
             @Override
@@ -98,7 +126,7 @@ public class DesignerUtil {
 
     public static StringConverter<LanguageVersion> languageVersionStringConverter() {
         return DesignerUtil.stringConverter(LanguageVersion::getShortName,
-            s -> LanguageRegistry.findLanguageVersionByTerseName(s.toLowerCase()));
+            s -> LanguageRegistry.findLanguageVersionByTerseName(s.toLowerCase(Locale.ROOT)));
     }
 
 
@@ -114,7 +142,7 @@ public class DesignerUtil {
     }
 
 
-    public static LanguageVersion getLanguageVersionFromExtension(String filename) {
+    public static synchronized LanguageVersion getLanguageVersionFromExtension(String filename) {
         if (extensionsToLanguage == null) {
             extensionsToLanguage = getExtensionsToLanguageMap();
         }
@@ -127,7 +155,7 @@ public class DesignerUtil {
     }
 
 
-    public static List<LanguageVersion> getSupportedLanguageVersions() {
+    public static synchronized List<LanguageVersion> getSupportedLanguageVersions() {
         if (supportedLanguageVersions == null) {
             List<LanguageVersion> languageVersions = new ArrayList<>();
             for (LanguageVersion languageVersion : LanguageRegistry.findAllVersions()) {
@@ -152,14 +180,38 @@ public class DesignerUtil {
      */
     public static <T> void rewire(Property<T> underlying, ObservableValue<? extends T> ui, Consumer<? super T> setter) {
         setter.accept(underlying.getValue());
-        underlying.unbind();
-        underlying.bind(ui); // Bindings are garbage collected after the popup dies
+        rewire(underlying, ui);
     }
     
     /** Like rewire, with no initialisation. */
     public static <T> void rewire(Property<T> underlying, ObservableValue<? extends T> source) {
         underlying.unbind();
-        underlying.bind(source);
+        underlying.bind(source); // Bindings are garbage collected after the popup dies
+    }
+
+
+    /**
+     * Works out an xpath query that matches the node
+     * which was being visited during the failure.
+     *
+     * <p>The query selects nodes that have exactly the
+     * same ancestors than the node in which the last call
+     * from the stack trace.
+     *
+     * @param stackTrace full stack trace
+     *
+     * @return An xpath expression if possible
+     */
+    public static Optional<String> stackTraceToXPath(String stackTrace) {
+        List<String> lines = Arrays.stream(stackTrace.split("\\n"))
+                                   .map(JJT_ACCEPT_PATTERN::matcher)
+                                   .filter(Matcher::find)
+                                   .map(m -> m.group(1))
+                                   .collect(Collectors.toList());
+
+        Collections.reverse(lines);
+
+        return lines.isEmpty() ? Optional.empty() : Optional.of("//" + String.join("/", lines));
     }
 
 }

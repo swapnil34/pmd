@@ -6,6 +6,7 @@ folder: pmd/rules/jsp
 sidebaractiveurl: /pmd_rules_jsp.html
 editmepath: ../pmd-jsp/src/main/resources/category/jsp/security.xml
 keywords: Security, IframeMissingSrcAttribute, NoUnsanitizedJSPExpression
+language: Java Server Pages
 ---
 ## IframeMissingSrcAttribute
 
@@ -16,6 +17,7 @@ keywords: Security, IframeMissingSrcAttribute, NoUnsanitizedJSPExpression
 IFrames which are missing a src element can cause security information popups in IE if you are accessing the page
 through SSL. See http://support.microsoft.com/default.aspx?scid=kb;EN-US;Q261188
 
+**This rule is defined by the following XPath expression:**
 ```
 //Element[upper-case(@Name)="IFRAME"][count(Attribute[upper-case(@Name)="SRC" ]) = 0]
 ```
