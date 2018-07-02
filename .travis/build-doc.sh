@@ -25,6 +25,8 @@ echo -e "\n\n"
 log_info "Creating pmd-doc archive..."
 mv _site pmd-doc-${VERSION}
 zip -qr pmd-doc-${VERSION}.zip pmd-doc-${VERSION}/
+log_success "Successfully created pmd-doc-${VERSION}.zip:"
+ls -lh pmd-doc-${VERSION}.zip
 
 (
     # disable fast fail, exit immediately, in this subshell
@@ -37,6 +39,8 @@ zip -qr pmd-doc-${VERSION}.zip pmd-doc-${VERSION}/
         if [ $? -ne 0 ]; then
             log_error "Couldn't upload pmd-doc-${VERSION}.zip!"
             log_error "Please upload manually: https://sourceforge.net/projects/pmd/files/pmd/"
+        else
+            log_success "Successfully uploaded pmd-doc-${VERSION}.zip to sourceforge"
         fi
     fi
 
@@ -59,6 +63,7 @@ zip -qr pmd-doc-${VERSION}.zip pmd-doc-${VERSION}/
 
 #
 # Push the generated site to gh-pages branch
+# only for snapshot builds from branch master
 #
 if [[ "${VERSION}" == *-SNAPSHOT && "${TRAVIS_BRANCH}" == "master" ]] && has_docs_change; then
     echo -e "\n\n"
@@ -73,7 +78,11 @@ if [[ "${VERSION}" == *-SNAPSHOT && "${TRAVIS_BRANCH}" == "master" ]] && has_doc
         git config user.name "Travis CI (pmd-bot)"
         git config user.email "andreas.dangel+pmd-bot@adangel.org"
         git add -A
-        git commit -q -m "Update documentation"
+        MSG="Update documentation
+
+TRAVIS_JOB_NUMBER=${TRAVIS_JOB_NUMBER}
+TRAVIS_COMMIT_RANGE=${TRAVIS_COMMIT_RANGE}"
+        git commit -q -m "$MSG"
         git push git@github.com:pmd/pmd.git HEAD:gh-pages
         log_success "Successfully pushed site to https://pmd.github.io/pmd/"
     )

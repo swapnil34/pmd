@@ -14,7 +14,11 @@ function push_docs() {
             git config user.name "Travis CI (pmd-bot)"
             git config user.email "andreas.dangel+pmd-bot@adangel.org"
             git add -A docs
-            git commit -m "Update documentation"
+            MSG="Update documentation
+
+TRAVIS_JOB_NUMBER=${TRAVIS_JOB_NUMBER}
+TRAVIS_COMMIT_RANGE=${TRAVIS_COMMIT_RANGE}"
+            git commit -m "$MSG"
             git push git@github.com:pmd/pmd.git HEAD:master
             log_success "Successfully pushed docs update"
         else
@@ -63,11 +67,15 @@ elif travis_isPush; then
         if [ $? -ne 0 ]; then
             log_error "Error while uploading pmd-*-${VERSION}.zip to sourceforge!"
             log_error "Please upload manually: https://sourceforge.net/projects/pmd/files/pmd/"
+        else
+            log_success "Successfully uploaded pmd-*-${VERSION}.zip to sourceforge"
         fi
         rsync -avh docs/pages/release_notes.md ${PMD_SF_USER}@web.sourceforge.net:/home/frs/project/pmd/pmd/${VERSION}/ReadMe.md
         if [ $? -ne 0 ]; then
             log_error "Error while uploading release_notes.md as ReadMe.md to sourceforge!"
             log_error "Please upload manually: https://sourceforge.net/projects/pmd/files/pmd/"
+        else
+            log_success "Successfully uploaded release_notes.md as ReadMe.md to sourceforge"
         fi
         true
     )
